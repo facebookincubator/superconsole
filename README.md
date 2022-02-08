@@ -10,8 +10,7 @@ Finally, superconsole delineates between rendering logic and program state - eac
 
 ## Examples
 
-```
-rust
+```rust
 struct HelloWorld;
 
 impl Component for HelloWorld {

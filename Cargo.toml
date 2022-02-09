@@ -1,0 +1,23 @@
+[package]
+name = "superconsole"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+crossterm = "0.20"
+gazebo_lint = { path = "../gazebo_lint/gazebo_lint" }
+itertools = "0.10"
+unicode-segmentation = "1.7"
+gazebo = { path = "../gazebo/gazebo"}
+thiserror = "1"
+termwiz = "0.15"
+
+[features]
+default = ["custom_linter"]
+custom_linter = []
+
+[dev-dependencies]
+tokio = { version = "1.5", features = ["macros", "rt-multi-thread", "time"]}
+lipsum = "0.7"
+derive_more = "0.99"

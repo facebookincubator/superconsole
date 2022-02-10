@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1"
+anyhow = "1.0.51"
 crossterm = "0.20"
 gazebo_lint = { path = "../gazebo_lint/gazebo_lint" }
 itertools = "0.10"

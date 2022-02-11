@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.51"
 crossterm = "0.20"
-itertools = "0.10"
+itertools = "0.10.0"
 unicode-segmentation = "1.7"
 # @oss-disable: gazebo = { path = "../gazebo/gazebo" }
 gazebo = "0.4" # @oss-enable

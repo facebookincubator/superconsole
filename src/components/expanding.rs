@@ -46,7 +46,7 @@ mod tests {
 
     #[test]
     fn test() -> anyhow::Result<()> {
-        let expander = Expanding::new(box Echo::<Lines>::new(false));
+        let expander = Expanding::new(Box::new(Echo::<Lines>::new(false)));
         let dims = Dimensions { x: 20, y: 20 };
 
         let longest_line: Line = vec!["Hello world"].try_into()?;

@@ -183,7 +183,10 @@ mod tests {
 
     fn make_splitter(kind: SplitKind, dimension: Direction) -> Split {
         Split::new(
-            vec![box Echo::<Echo1>::new(false), box Echo::<Echo2>::new(false)],
+            vec![
+                Box::new(Echo::<Echo1>::new(false)),
+                Box::new(Echo::<Echo2>::new(false)),
+            ],
             dimension,
             kind,
         )
@@ -304,9 +307,9 @@ mod tests {
         fn test_many_sized() {
             let splitter = Split::new(
                 vec![
-                    box Echo::<Echo1>::new(false),
-                    box Echo::<Echo2>::new(false),
-                    box Echo::<Echo3>::new(false),
+                    Box::new(Echo::<Echo1>::new(false)),
+                    Box::new(Echo::<Echo2>::new(false)),
+                    Box::new(Echo::<Echo3>::new(false)),
                 ],
                 Direction::Horizontal,
                 SplitKind::Sized(vec![0.25, 0.5, 0.25]),
@@ -405,9 +408,9 @@ mod tests {
         fn test_many_sized() {
             let splitter = Split::new(
                 vec![
-                    box Echo::<Echo1>::new(false),
-                    box Echo::<Echo2>::new(false),
-                    box Echo::<Echo3>::new(false),
+                    Box::new(Echo::<Echo1>::new(false)),
+                    Box::new(Echo::<Echo2>::new(false)),
+                    Box::new(Echo::<Echo3>::new(false)),
                 ],
                 Direction::Vertical,
                 SplitKind::Sized(vec![0.25, 0.5, 0.25]),
@@ -469,7 +472,7 @@ mod tests {
         #[should_panic(expected = "There must be an equal number of ratios and children.")]
         fn test_different_ratio_count() {
             Split::new(
-                vec![box Blank, box Blank, box Blank],
+                vec![Box::new(Blank), Box::new(Blank), Box::new(Blank)],
                 Direction::Vertical,
                 SplitKind::Sized(vec![0.4, 0.4]),
             );

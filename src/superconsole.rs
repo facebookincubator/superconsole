@@ -187,7 +187,7 @@ mod tests {
         #[derive(AsRef, Debug)]
         struct Msg(Lines);
 
-        let root = box Echo::<Msg>::new(false);
+        let root = Box::new(Echo::<Msg>::new(false));
         let mut console = match SuperConsole::new(root) {
             Some(console) => console,
             // Return early if this test is run from CI
@@ -219,7 +219,7 @@ mod tests {
         #[derive(AsRef, Debug)]
         struct Msg(Lines);
 
-        let root = box Echo::<Msg>::new(false);
+        let root = Box::new(Echo::<Msg>::new(false));
         let mut console = match SuperConsole::new(root) {
             Some(console) => console,
             // Return early if this test is run from CI

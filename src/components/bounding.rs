@@ -46,7 +46,7 @@ mod tests {
 
     #[test]
     fn test_no_bounding() -> anyhow::Result<()> {
-        let test = Bounded::new(box Echo::<Msg>::new(false), Some(40), Some(40));
+        let test = Bounded::new(Box::new(Echo::<Msg>::new(false)), Some(40), Some(40));
         let msg = Msg(vec![crate::line!(Span::new_unstyled("hello world")?)]);
         let output = test.draw(
             &crate::state![&msg],
@@ -62,7 +62,7 @@ mod tests {
 
     #[test]
     fn test_bounding() -> anyhow::Result<()> {
-        let test = Bounded::new(box Echo::<Msg>::new(false), Some(2), Some(1));
+        let test = Bounded::new(Box::new(Echo::<Msg>::new(false)), Some(2), Some(1));
         let msg = Msg(vec![
             crate::line!(Span::new_unstyled("hello world")?),
             crate::line!(Span::new_unstyled("hello world")?),

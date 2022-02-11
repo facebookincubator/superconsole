@@ -22,7 +22,7 @@ pub struct Padded {
 impl Default for Padded {
     fn default() -> Self {
         Self {
-            child: box Blank,
+            child: Box::new(Blank),
             left: 0,
             right: 0,
             top: 0,
@@ -91,7 +91,7 @@ mod tests {
     #[test]
     fn test_pad_left() {
         let padder = Padded {
-            child: box Echo::<Msg>::new(false),
+            child: Box::new(Echo::<Msg>::new(false)),
             left: 5,
             ..Default::default()
         };
@@ -119,7 +119,7 @@ mod tests {
     #[test]
     fn test_pad_right() {
         let padder = Padded {
-            child: box Echo::<Msg>::new(false),
+            child: Box::new(Echo::<Msg>::new(false)),
             right: 4,
             ..Default::default()
         };
@@ -145,7 +145,7 @@ mod tests {
     #[test]
     fn test_pad_top() {
         let padder = Padded {
-            child: box Echo::<Msg>::new(false),
+            child: Box::new(Echo::<Msg>::new(false)),
             top: 5,
             ..Default::default()
         };
@@ -177,7 +177,7 @@ mod tests {
     #[test]
     fn test_pad_bottom() {
         let padder = Padded {
-            child: box Echo::<Msg>::new(false),
+            child: Box::new(Echo::<Msg>::new(false)),
             bottom: 5,
             ..Default::default()
         };
@@ -209,7 +209,7 @@ mod tests {
     #[test]
     fn test_no_pad() {
         let padder = Padded {
-            child: box Echo::<Msg>::new(false),
+            child: Box::new(Echo::<Msg>::new(false)),
             ..Default::default()
         };
         let mut state = State::new();
@@ -235,7 +235,7 @@ mod tests {
     #[test]
     fn test_truncated() {
         let padder = Padded {
-            child: box Echo::<Msg>::new(false),
+            child: Box::new(Echo::<Msg>::new(false)),
             left: 5,
             right: 3,
             top: 3,

@@ -58,7 +58,7 @@ impl Aligned {
 impl Default for Aligned {
     fn default() -> Self {
         Self {
-            child: box Blank,
+            child: Box::new(Blank),
             horizontal: HorizontalAlignmentKind::Left(false),
             vertical: VerticalAlignmentKind::Top,
         }
@@ -136,7 +136,7 @@ mod tests {
     fn test_align_left_unjustified() {
         let mut state = State::new();
         let component = Aligned::new(
-            box Echo::<Msg>::new(false),
+            Box::new(Echo::<Msg>::new(false)),
             HorizontalAlignmentKind::Left(false),
             VerticalAlignmentKind::Top,
         );
@@ -159,7 +159,7 @@ mod tests {
     fn test_align_left_justified() {
         let mut state = State::new();
         let component = Aligned::new(
-            box Echo::<Msg>::new(false),
+            Box::new(Echo::<Msg>::new(false)),
             HorizontalAlignmentKind::Left(true),
             VerticalAlignmentKind::Top,
         );
@@ -189,7 +189,7 @@ mod tests {
     fn test_align_col_center() {
         let mut state = State::new();
         let component = Aligned::new(
-            box Echo::<Msg>::new(false),
+            Box::new(Echo::<Msg>::new(false)),
             HorizontalAlignmentKind::Center,
             VerticalAlignmentKind::Top,
         );
@@ -221,7 +221,7 @@ mod tests {
     fn test_align_right() {
         let mut state = State::new();
         let component = Aligned::new(
-            box Echo::<Msg>::new(false),
+            Box::new(Echo::<Msg>::new(false)),
             HorizontalAlignmentKind::Right,
             VerticalAlignmentKind::Top,
         );
@@ -251,7 +251,7 @@ mod tests {
     fn test_align_top() {
         let mut state = State::new();
         let component = Aligned::new(
-            box Echo::<Msg>::new(false),
+            Box::new(Echo::<Msg>::new(false)),
             HorizontalAlignmentKind::Left(false),
             VerticalAlignmentKind::Top,
         );
@@ -279,7 +279,7 @@ mod tests {
     fn test_align_row_center() {
         let mut state = State::new();
         let component = Aligned::new(
-            box Echo::<Msg>::new(false),
+            Box::new(Echo::<Msg>::new(false)),
             HorizontalAlignmentKind::Left(false),
             VerticalAlignmentKind::Center,
         );
@@ -314,7 +314,7 @@ mod tests {
     fn test_align_bottom() {
         let mut state = State::new();
         let component = Aligned::new(
-            box Echo::<Msg>::new(false),
+            Box::new(Echo::<Msg>::new(false)),
             HorizontalAlignmentKind::Left(false),
             VerticalAlignmentKind::Bottom,
         );

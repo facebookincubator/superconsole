@@ -149,7 +149,7 @@ mod tests {
 
     #[test]
     fn test_basic() -> anyhow::Result<()> {
-        let component = Bordered::new(box Echo::<Msg>::new(true), BorderedSpec::default());
+        let component = Bordered::new(Box::new(Echo::<Msg>::new(true)), BorderedSpec::default());
 
         let msg = Msg(vec![
             vec!["Test"].try_into()?,              // 4 chars
@@ -180,7 +180,7 @@ mod tests {
     #[test]
     fn test_complex() -> anyhow::Result<()> {
         let component = Bordered::new(
-            box Echo::<Msg>::new(true),
+            Box::new(Echo::<Msg>::new(true)),
             BorderedSpec {
                 top: Some("@@@".try_into()?),
                 left: None,
@@ -222,7 +222,7 @@ mod tests {
         let multi_width = "🦶";
 
         let component = Bordered::new(
-            box Echo::<Msg>::new(true),
+            Box::new(Echo::<Msg>::new(true)),
             BorderedSpec {
                 top: Some(multi_width.try_into()?),
                 left: None,

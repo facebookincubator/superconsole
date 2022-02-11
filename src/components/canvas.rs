@@ -26,7 +26,7 @@ pub(crate) struct Canvas {
 impl Default for Canvas {
     fn default() -> Self {
         Self {
-            child: box Blank,
+            child: Box::new(Blank),
             len: Cell::default(),
         }
     }

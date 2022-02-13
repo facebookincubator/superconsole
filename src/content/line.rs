@@ -162,7 +162,7 @@ macro_rules! line {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::convert::TryInto;
 
     use crossterm::style::Stylize;

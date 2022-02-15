@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under both the MIT license found in the
+ * LICENSE-MIT file in the root directory of this source tree and the Apache
+ * License, Version 2.0 found in the LICENSE-APACHE file in the root directory
+ * of this source tree.
+ */
+
 //! The root component which manages all other components.
 //! This is a fake component since it 1) manages state and 2) cannot be made by users and 3) is heavily coupled with [`superconsole`](crate::SuperConsole).
 //! Do not make this somewhere down the component hierarchy unless you have a good reason for it.

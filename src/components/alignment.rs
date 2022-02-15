@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under both the MIT license found in the
+ * LICENSE-MIT file in the root directory of this source tree and the Apache
+ * License, Version 2.0 found in the LICENSE-APACHE file in the root directory
+ * of this source tree.
+ */
+
 //! Oftentimes it is useful to align text inside the bounding box.
 //! This component offers a composiion based approach to do so.
 //! One may align text left, center, or right, and top, middle, or bottom.

@@ -1,0 +1,24 @@
+[package]
+name = "superconsole"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.51"
+crossterm = "0.23"
+itertools = "0.10"
+unicode-segmentation = "1.7"
+# @oss-disable: gazebo = { path = "../gazebo/gazebo" }
+gazebo = "0.4" # @oss-enable
+# @oss-disable: gazebo_lint = { path = "../gazebo_lint/gazebo_lint", optional = true }
+thiserror = "1"
+termwiz = "0.15"
+
+[features]
+# @oss-disable: default = ["custom_linter"]
+# @oss-disable: custom_linter = ["gazebo_lint"]
+
+[dev-dependencies]
+tokio = { version = "1.5", features = ["macros", "rt-multi-thread", "time"]}
+lipsum = "0.8"
+derive_more = "0.99"

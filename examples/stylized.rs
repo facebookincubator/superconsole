@@ -10,6 +10,8 @@
 #![cfg_attr(feature = "custom_linter", feature(plugin))]
 #![cfg_attr(feature = "custom_linter", allow(deprecated))] // :(
 #![cfg_attr(feature = "custom_linter", plugin(gazebo_lint))]
+// We deliberately make our code stable compatible
+#![cfg_attr(feature = "custom_linter", allow(use_box))]
 
 //! Example that demonstrates stylization.
 

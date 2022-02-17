@@ -11,12 +11,13 @@ unicode-segmentation = "1.7"
 # @oss-disable: gazebo = { path = "../gazebo/gazebo" }
 gazebo = "0.4" # @oss-enable
 # @oss-disable: gazebo_lint = { path = "../gazebo_lint/gazebo_lint", optional = true }
+gazebo_lint = { version = "0.1", optional = true } # @oss-enable
 thiserror = "1"
 termwiz = "0.15"
 
 [features]
 # @oss-disable: default = ["custom_linter"]
-# @oss-disable: custom_linter = ["gazebo_lint"]
+custom_linter = ["gazebo_lint"]
 
 [dev-dependencies]
 tokio = { version = "1.5", features = ["macros", "rt-multi-thread", "time"]}

@@ -16,8 +16,8 @@ thiserror = "1"
 termwiz = "0.15"
 
 [features]
-# @oss-disable: default = ["custom_linter"]
-custom_linter = ["gazebo_lint"]
+# @oss-disable: default = ["gazebo_linter"]
+gazebo_linter = ["gazebo_lint"]
 
 [dev-dependencies]
 tokio = { version = "1.5", features = ["macros", "rt-multi-thread", "time"]}

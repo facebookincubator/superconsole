@@ -36,11 +36,6 @@ pub fn main() {
 }
 ```
 
-## Requirements
-
-Superconsole works with MacOS, Linux, and Windows.
-Can only be run in a tty.
-
 See the [CONTRIBUTING](CONTRIBUTING.md) file for how to help out.
 
 ## License

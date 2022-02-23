@@ -8,6 +8,11 @@ Superconsole also offers stylization, including italics, underlining, bolding, a
 
 Finally, superconsole delineates between rendering logic and program state - each render call acceps an immutable reference to state, which components may use to inject state into their otherwise immutable rendering logic.
 
+## Demo
+
+![Superconsole running some buck2 tests](demo.gif)
+
+
 ## Examples
 
 ```rust

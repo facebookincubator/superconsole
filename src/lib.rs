@@ -27,7 +27,7 @@
 #![cfg_attr(feature = "gazebo_linter", allow(deprecated))] // :(
 #![cfg_attr(feature = "gazebo_linter", plugin(gazebo_lint))]
 // We deliberately make our code stable compatible
-#![cfg_attr(feature = "gazebo_linter", allow(use_box))]
+#![cfg_attr(feature = "gazebo_linter", allow(gazebo_lint_use_box))]
 
 // re-exports
 pub use components::{Component, DrawMode};

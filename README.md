@@ -16,23 +16,34 @@ Finally, superconsole delineates between rendering logic and program state - eac
 ## Examples
 
 ```rust
+use std::convert::TryInto;
+use superconsole::{
+    components::bordering::{Bordered, BorderedSpec},
+    state, Component, Dimensions, DrawMode, Line, State, SuperConsole,
+};
+
+#[derive(Debug)]
 struct HelloWorld;
 
 impl Component for HelloWorld {
     fn draw_unchecked(
         &self,
-        state: &State,
-        dimensions: Dimensions,
-        mode: DrawMode,
+        _state: &State,
+        _dimensions: Dimensions,
+        _mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {
         Ok(vec![vec!["hello world"].try_into()?])
     }
 }
 
-pub fn main() {
+pub fn main() -> anyhow::Result<()> {
     let bordering = BorderedSpec::default();
-    let mut superconsole = Superconsole::new(box Bordered::new(box HelloWorld, bordering)).unwrap();
-    let _res = superconsole.render(&state![]).unwrap();
+    let mut superconsole =
+        SuperConsole::new(Box::new(Bordered::new(Box::new(HelloWorld), bordering)))
+            .ok_or_else(|| anyhow::anyhow!("Not a TTY"))?;
+    superconsole.render(&state![])?;
+    superconsole.finalize(&state![])?;
+    Ok(())
 }
 ```
 

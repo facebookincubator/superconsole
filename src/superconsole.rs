@@ -18,7 +18,7 @@ use crossterm::{
 use crate::{
     components::{Canvas, Component, DrawMode},
     content::{Line, LinesExt},
-    output::{StderrSuperConsoleOutput, SuperConsoleOutput},
+    output::{BlockingSuperConsoleOutput, SuperConsoleOutput},
     Dimensions, Lines, State,
 };
 
@@ -46,7 +46,7 @@ impl SuperConsole {
             root: Canvas::new(root),
             to_emit: Vec::new(),
             default_size: None,
-            output: Box::new(StderrSuperConsoleOutput),
+            output: Box::new(BlockingSuperConsoleOutput),
         })
     }
 
@@ -57,7 +57,7 @@ impl SuperConsole {
             root: Canvas::new(root),
             to_emit: Vec::new(),
             default_size: Some(default_size),
-            output: Box::new(StderrSuperConsoleOutput),
+            output: Box::new(BlockingSuperConsoleOutput),
         }
     }
 

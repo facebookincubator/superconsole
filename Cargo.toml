@@ -14,6 +14,7 @@ gazebo = "0.4" # @oss-enable
 gazebo_lint = { version = "0.1", optional = true } # @oss-enable
 thiserror = "1"
 termwiz = "0.15"
+crossbeam-channel = "0.5"
 
 [features]
 # @oss-disable: default = ["gazebo_lint"]

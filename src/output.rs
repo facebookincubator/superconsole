@@ -71,7 +71,6 @@ pub(crate) struct NonBlockingSuperConsoleOutput {
 }
 
 impl NonBlockingSuperConsoleOutput {
-    #[allow(unused)]
     pub fn new() -> anyhow::Result<Self> {
         let (sender, receiver) = bounded::<Vec<u8>>(1);
 

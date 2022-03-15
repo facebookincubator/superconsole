@@ -36,13 +36,14 @@ pub use dimensions::{Dimensions, Direction};
 pub use error::Error;
 pub use state::State;
 
-pub use crate::superconsole::SuperConsole;
+pub use crate::{builder::Builder, superconsole::SuperConsole};
 
+pub mod builder;
 pub mod components;
 pub mod content;
 mod dimensions;
 mod error;
-pub mod output;
+mod output;
 mod state;
 pub mod style;
 mod superconsole;

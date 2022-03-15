@@ -42,22 +42,30 @@ pub struct SuperConsole {
 impl SuperConsole {
     /// Build a new SuperConsole with a root component.
     pub fn new(root: Box<dyn Component>) -> Option<Self> {
-        Self::compatible().then(|| Self {
-            root: Canvas::new(root),
-            to_emit: Vec::new(),
-            default_size: None,
-            output: Box::new(BlockingSuperConsoleOutput),
-        })
+        Self::compatible()
+            .then(|| Self::new_internal(root, None, Box::new(BlockingSuperConsoleOutput)))
     }
 
     /// Force a new SuperConsole to be built with a root component, regardless of
     /// whether the tty is compatible
     pub fn forced_new(root: Box<dyn Component>, default_size: Dimensions) -> Self {
+        Self::new_internal(
+            root,
+            Some(default_size),
+            Box::new(BlockingSuperConsoleOutput),
+        )
+    }
+
+    pub(crate) fn new_internal(
+        root: Box<dyn Component>,
+        default_size: Option<Dimensions>,
+        output: Box<dyn SuperConsoleOutput>,
+    ) -> Self {
         Self {
             root: Canvas::new(root),
             to_emit: Vec::new(),
-            default_size: Some(default_size),
-            output: Box::new(BlockingSuperConsoleOutput),
+            default_size,
+            output,
         }
     }
 

@@ -7,7 +7,10 @@
  * of this source tree.
  */
 
-use std::io::{self, Write};
+use std::{
+    any::Any,
+    io::{self, Write},
+};
 
 pub trait SuperConsoleOutput: Send + Sync + 'static {
     /// Called before rendering will occur. This has a chance to prevent rendering by returning
@@ -21,6 +24,12 @@ pub trait SuperConsoleOutput: Send + Sync + 'static {
     /// Called when the console has finalized. This must block if necessary. No further output will
     /// be emitted.
     fn finalize(self: Box<Self>) -> anyhow::Result<()>;
+
+    /// Get this Output as an Any. This is used for testing.
+    fn as_any(&self) -> &dyn Any;
+
+    /// Get this Output as a mutable Any. This is used for testing.
+    fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 
 pub(crate) struct StderrSuperConsoleOutput;
@@ -40,5 +49,14 @@ impl SuperConsoleOutput for StderrSuperConsoleOutput {
 
     fn finalize(self: Box<Self>) -> anyhow::Result<()> {
         Ok(())
+    }
+
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }

@@ -183,8 +183,9 @@ impl SuperConsole {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryInto;
+    use std::{any::Any, convert::TryInto};
 
+    use anyhow::Context as _;
     use derive_more::AsRef;
 
     use super::*;
@@ -194,12 +195,13 @@ mod tests {
     struct Msg(Lines);
 
     struct TestOutput {
+        should_render: bool,
         frames: Vec<Vec<u8>>,
     }
 
     impl SuperConsoleOutput for TestOutput {
         fn should_render(&mut self) -> bool {
-            true
+            self.should_render
         }
 
         fn output(&mut self, buffer: Vec<u8>) -> anyhow::Result<()> {
@@ -210,6 +212,30 @@ mod tests {
         fn finalize(self: Box<Self>) -> anyhow::Result<()> {
             Ok(())
         }
+
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+
+        fn as_any_mut(&mut self) -> &mut dyn Any {
+            self
+        }
+    }
+
+    impl SuperConsole {
+        fn test_output(&self) -> anyhow::Result<&TestOutput> {
+            self.output
+                .as_any()
+                .downcast_ref()
+                .context("Downcast failed")
+        }
+
+        fn test_output_mut(&mut self) -> anyhow::Result<&mut TestOutput> {
+            self.output
+                .as_any_mut()
+                .downcast_mut()
+                .context("Downcast failed")
+        }
     }
 
     fn test_console(root: Box<dyn Component>) -> SuperConsole {
@@ -217,8 +243,20 @@ mod tests {
             root: Canvas::new(root),
             to_emit: Vec::new(),
             default_size: Some(Dimensions { x: 80, y: 80 }),
-            output: Box::new(TestOutput { frames: Vec::new() }),
+            output: Box::new(TestOutput {
+                should_render: true,
+                frames: Vec::new(),
+            }),
         }
+    }
+
+    fn frame_contains(frame: &[u8], needle: &[u8]) -> bool {
+        for w in frame.windows(needle.len()) {
+            if w == needle {
+                return true;
+            }
+        }
+        false
     }
 
     #[test]
@@ -264,6 +302,88 @@ mod tests {
 
         // We have so many that we should just drain them all.
         assert!(console.to_emit.is_empty());
+
+        Ok(())
+    }
+
+    /// Check that no frames are produced when should_render returns false.
+    #[test]
+    fn test_block_render() -> anyhow::Result<()> {
+        let root = Box::new(Echo::<Msg>::new(false));
+        let mut console = test_console(root);
+
+        let msg = Msg(vec![vec!["state"].try_into()?; 1]);
+        let state = crate::state![&msg];
+
+        console.render(&state)?;
+        assert_eq!(console.test_output()?.frames.len(), 1);
+
+        console.test_output_mut()?.should_render = false;
+        console.render(&state)?;
+        assert_eq!(console.test_output()?.frames.len(), 1);
+
+        console.emit(vec![vec!["line 1"].try_into()?]);
+        console.render(&state)?;
+        assert_eq!(console.test_output()?.frames.len(), 1);
+
+        Ok(())
+    }
+
+    /// Check that lines are deferred when should_render returns false, and emitted once the output
+    /// is unblocked.
+    #[test]
+    fn test_block_lines() -> anyhow::Result<()> {
+        let root = Box::new(Echo::<Msg>::new(false));
+        let mut console = test_console(root);
+
+        let msg = Msg(vec![vec!["state"].try_into()?; 1]);
+        let state = crate::state![&msg];
+
+        console.test_output_mut()?.should_render = false;
+        console.emit(vec![vec!["line 1"].try_into()?]);
+        console.render(&state)?;
+        assert_eq!(console.test_output()?.frames.len(), 0);
+
+        console.test_output_mut()?.should_render = true;
+        console.emit(vec![vec!["line 2"].try_into()?]);
+        console.render(&state)?;
+
+        let frame = console
+            .test_output_mut()?
+            .frames
+            .pop()
+            .context("No frame was emitted")?;
+
+        assert!(frame_contains(&frame, "state".as_bytes()));
+        assert!(frame_contains(&frame, "line 1".as_bytes()));
+        assert!(frame_contains(&frame, "line 2".as_bytes()));
+
+        Ok(())
+    }
+
+    /// Check that render_with_mode does not respect should_render.
+    #[test]
+    fn test_block_finalize() -> anyhow::Result<()> {
+        let root = Box::new(Echo::<Msg>::new(false));
+        let mut console = test_console(root);
+
+        let msg = Msg(vec![vec!["state"].try_into()?; 1]);
+        let state = crate::state![&msg];
+
+        console.test_output_mut()?.should_render = false;
+        console.emit(vec![vec!["line 1"].try_into()?]);
+        console.emit(vec![vec!["line 2"].try_into()?]);
+        console.render_with_mode(&state, DrawMode::Final)?;
+
+        let frame = console
+            .test_output_mut()?
+            .frames
+            .pop()
+            .context("No frame was emitted")?;
+
+        assert!(frame_contains(&frame, "state".as_bytes()));
+        assert!(frame_contains(&frame, "line 1".as_bytes()));
+        assert!(frame_contains(&frame, "line 2".as_bytes()));
 
         Ok(())
     }

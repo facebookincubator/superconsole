@@ -88,7 +88,7 @@ impl SuperConsole {
 
     /// Perform a final render.
     /// This time, each component will have a chance to finalize themselves before the terminal is disposed of.
-    pub fn finalize(&mut self, state: &State) -> anyhow::Result<()> {
+    pub fn finalize(mut self, state: &State) -> anyhow::Result<()> {
         self.render_with_mode(state, DrawMode::Final)?;
         self.output.finalize()?;
         Ok(())

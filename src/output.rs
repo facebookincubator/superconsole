@@ -20,7 +20,7 @@ pub trait SuperConsoleOutput: Send + Sync + 'static {
 
     /// Called when the console has finalized. This must block if necessary. No further output will
     /// be emitted.
-    fn finalize(&mut self) -> anyhow::Result<()>;
+    fn finalize(self: Box<Self>) -> anyhow::Result<()>;
 }
 
 pub(crate) struct StderrSuperConsoleOutput;
@@ -38,7 +38,7 @@ impl SuperConsoleOutput for StderrSuperConsoleOutput {
         Ok(())
     }
 
-    fn finalize(&mut self) -> anyhow::Result<()> {
+    fn finalize(self: Box<Self>) -> anyhow::Result<()> {
         Ok(())
     }
 }

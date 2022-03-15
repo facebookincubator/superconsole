@@ -190,18 +190,41 @@ mod tests {
     use super::*;
     use crate::{components::Echo, Lines};
 
-    #[test]
-    // Note: this test cannot be run without a terminal.
-    fn test_small_buffer() {
-        #[derive(AsRef, Debug)]
-        struct Msg(Lines);
+    #[derive(AsRef, Debug)]
+    struct Msg(Lines);
 
+    struct TestOutput {
+        frames: Vec<Vec<u8>>,
+    }
+
+    impl SuperConsoleOutput for TestOutput {
+        fn should_render(&mut self) -> bool {
+            true
+        }
+
+        fn output(&mut self, buffer: Vec<u8>) -> anyhow::Result<()> {
+            self.frames.push(buffer);
+            Ok(())
+        }
+
+        fn finalize(self: Box<Self>) -> anyhow::Result<()> {
+            Ok(())
+        }
+    }
+
+    fn test_console(root: Box<dyn Component>) -> SuperConsole {
+        SuperConsole {
+            root: Canvas::new(root),
+            to_emit: Vec::new(),
+            default_size: Some(Dimensions { x: 80, y: 80 }),
+            output: Box::new(TestOutput { frames: Vec::new() }),
+        }
+    }
+
+    #[test]
+    fn test_small_buffer() {
         let root = Box::new(Echo::<Msg>::new(false));
-        let mut console = match SuperConsole::new(root) {
-            Some(console) => console,
-            // Return early if this test is run from CI
-            None => return,
-        };
+        let mut console = test_console(root);
         let msg_count = MINIMUM_EMIT + 5;
         console.emit(vec![vec!["line 1"].try_into().unwrap(); msg_count]);
         let msg = Msg(vec![vec!["line"].try_into().unwrap(); msg_count]);
@@ -223,17 +246,9 @@ mod tests {
     }
 
     #[test]
-    // Note: this test cannot be run without a terminal.
     fn test_huge_buffer() {
-        #[derive(AsRef, Debug)]
-        struct Msg(Lines);
-
         let root = Box::new(Echo::<Msg>::new(false));
-        let mut console = match SuperConsole::new(root) {
-            Some(console) => console,
-            // Return early if this test is run from CI
-            None => return,
-        };
+        let mut console = test_console(root);
         console.emit(vec![
             vec!["line 1"].try_into().unwrap();
             MAX_GRAPHEME_BUFFER * 2

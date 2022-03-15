@@ -7,7 +7,7 @@
  * of this source tree.
  */
 
-use std::{cmp, io, io::Write};
+use std::{cmp, io};
 
 use crossterm::{
     queue,
@@ -18,6 +18,7 @@ use crossterm::{
 use crate::{
     components::{Canvas, Component, DrawMode},
     content::{Line, LinesExt},
+    output::{StderrSuperConsoleOutput, SuperConsoleOutput},
     Dimensions, Lines, State,
 };
 
@@ -28,7 +29,6 @@ const MAX_GRAPHEME_BUFFER: usize = 1000000;
 /// A Canvas area at the bottom of the terminal is re-rendered in place at each tick for the components,
 /// while a log area of emitted messages is produced above.
 /// Producing output from sources other than SuperConsole while break the TUI.
-#[derive(Default)]
 pub struct SuperConsole {
     root: Canvas,
     to_emit: Vec<Line>,
@@ -36,6 +36,7 @@ pub struct SuperConsole {
     // from the terminal. This generally is only used for testing
     // situations.
     default_size: Option<Dimensions>,
+    output: Box<dyn SuperConsoleOutput>,
 }
 
 impl SuperConsole {
@@ -43,7 +44,9 @@ impl SuperConsole {
     pub fn new(root: Box<dyn Component>) -> Option<Self> {
         Self::compatible().then(|| Self {
             root: Canvas::new(root),
-            ..Default::default()
+            to_emit: Vec::new(),
+            default_size: None,
+            output: Box::new(StderrSuperConsoleOutput),
         })
     }
 
@@ -52,8 +55,9 @@ impl SuperConsole {
     pub fn forced_new(root: Box<dyn Component>, default_size: Dimensions) -> Self {
         Self {
             root: Canvas::new(root),
+            to_emit: Vec::new(),
             default_size: Some(default_size),
-            ..Default::default()
+            output: Box::new(StderrSuperConsoleOutput),
         }
     }
 
@@ -113,19 +117,9 @@ impl SuperConsole {
 
     /// Clears the canvas portion of the superconsole.
     pub fn clear(&mut self) -> anyhow::Result<()> {
-        let mut writer = vec![];
-        self.root.clear(&mut writer)?;
-        Self::send_to_tty(&writer)
-    }
-
-    fn send_to_tty(buffer: &[u8]) -> anyhow::Result<()> {
-        // the lock (and the flush) are probably unnecessary, but they don't hurt.
-        let stderr = io::stderr();
-        let mut handle = stderr.lock();
-        handle.write_all(buffer)?;
-        handle.flush()?;
-
-        Ok(())
+        let mut buffer = vec![];
+        self.root.clear(&mut buffer)?;
+        self.output.output(buffer)
     }
 
     /// Helper method to share render + finalize behavior by specifying mode.
@@ -137,7 +131,7 @@ impl SuperConsole {
         let mut buffer = Vec::new();
 
         self.render_general(&mut buffer, state, mode, size)?;
-        Self::send_to_tty(&buffer)
+        self.output.output(buffer)
     }
 
     /// Helper method that makes rendering highly configurable.

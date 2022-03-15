@@ -222,52 +222,49 @@ mod tests {
     }
 
     #[test]
-    fn test_small_buffer() {
+    fn test_small_buffer() -> anyhow::Result<()> {
         let root = Box::new(Echo::<Msg>::new(false));
         let mut console = test_console(root);
         let msg_count = MINIMUM_EMIT + 5;
-        console.emit(vec![vec!["line 1"].try_into().unwrap(); msg_count]);
-        let msg = Msg(vec![vec!["line"].try_into().unwrap(); msg_count]);
+        console.emit(vec![vec!["line 1"].try_into()?; msg_count]);
+        let msg = Msg(vec![vec!["line"].try_into()?; msg_count]);
         let state = crate::state![&msg];
         let mut buffer = Vec::new();
 
         // even though the canvas is larger than the tty
-        console
-            .render_general(
-                &mut buffer,
-                &state,
-                DrawMode::Normal,
-                Dimensions::new(100, 2),
-            )
-            .unwrap();
+        console.render_general(
+            &mut buffer,
+            &state,
+            DrawMode::Normal,
+            Dimensions::new(100, 2),
+        )?;
 
         // we should still drain a minimum of 5 messages.
         assert_eq!(console.to_emit.len(), msg_count - MINIMUM_EMIT);
+
+        Ok(())
     }
 
     #[test]
-    fn test_huge_buffer() {
+    fn test_huge_buffer() -> anyhow::Result<()> {
         let root = Box::new(Echo::<Msg>::new(false));
         let mut console = test_console(root);
-        console.emit(vec![
-            vec!["line 1"].try_into().unwrap();
-            MAX_GRAPHEME_BUFFER * 2
-        ]);
-        let msg = Msg(vec![vec!["line"].try_into().unwrap(); 1]);
+        console.emit(vec![vec!["line 1"].try_into()?; MAX_GRAPHEME_BUFFER * 2]);
+        let msg = Msg(vec![vec!["line"].try_into()?; 1]);
         let state = crate::state![&msg];
         let mut buffer = Vec::new();
 
         // Even though we have more messages than fit on the screen in the `to_emit` buffer
-        console
-            .render_general(
-                &mut buffer,
-                &state,
-                DrawMode::Normal,
-                Dimensions::new(100, 20),
-            )
-            .unwrap();
+        console.render_general(
+            &mut buffer,
+            &state,
+            DrawMode::Normal,
+            Dimensions::new(100, 20),
+        )?;
 
         // We have so many that we should just drain them all.
         assert!(console.to_emit.is_empty());
+
+        Ok(())
     }
 }

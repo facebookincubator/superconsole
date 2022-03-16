@@ -19,7 +19,7 @@ use crate::{
     components::{Canvas, Component, DrawMode},
     content::{Line, LinesExt},
     output::{BlockingSuperConsoleOutput, SuperConsoleOutput},
-    Dimensions, Lines, State,
+    Dimensions, Direction, Lines, State,
 };
 
 const MINIMUM_EMIT: usize = 5;
@@ -141,7 +141,9 @@ impl SuperConsole {
         // TODO(cjhopman): We may need to try to keep each write call to be under the pipe buffer
         // size so it can be completed in a single syscall otherwise we might see a partially
         // rendered frame.
-        let size = self.size()?;
+
+        // We remove the last line as we always have a blank final line in our output.
+        let size = self.size()?.saturating_sub(1, Direction::Vertical);
         let mut buffer = Vec::new();
 
         self.render_general(&mut buffer, state, mode, size)?;

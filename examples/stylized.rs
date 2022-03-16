@@ -93,7 +93,7 @@ async fn main() {
     ];
 
     let mut timer = time::interval(Duration::from_secs_f32(0.5));
-    for i in 0..(10 as usize) {
+    for i in 0usize..10usize {
         let styled = i.to_string().with(Color::Green).on(Color::Black);
         console.emit(vec![Line(vec![styled.try_into().unwrap()])]);
         let customers = (i..std::cmp::min(10, i + 2))

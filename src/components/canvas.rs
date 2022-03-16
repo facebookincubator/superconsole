@@ -70,12 +70,7 @@ impl Canvas {
     /// The first half of drawing.  It moves the buffer up to be overwritten and sets the length to 0.
     /// This is used to clear the scratch area so that any possibly emitted messages can write over it.
     pub(crate) fn move_up(&self, writer: &mut Vec<u8>) -> anyhow::Result<()> {
-        // although moving up by 0 should abstractly work, this is actually borked.
         let len = self.len.take();
-        if len == 0 {
-            return Ok(());
-        }
-
         queue!(writer, MoveUp(len), MoveToColumn(0),)?;
 
         Ok(())

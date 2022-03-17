@@ -79,7 +79,6 @@ impl Line {
                 self.0.truncate(index);
                 break;
             }
-
             let word = span.content.graphemes(true);
             let word_len = word.clone().count();
             // if the line is going to overflow
@@ -99,6 +98,41 @@ impl Line {
                 break;
             }
             cur_width += word_len;
+        }
+    }
+
+    /// Slices out some middle subline of the Line. Removes the first `start` characters and
+    /// keeps `width` characters after that.
+    pub fn trim_ends(&mut self, mut start: usize, mut width: usize) {
+        let mut owned = Vec::new();
+        std::mem::swap(&mut owned, &mut self.0);
+
+        for mut span in owned.into_iter() {
+            // TODO(cjhopman): Other code here uses a mix of graphemes count and span.len() for computing the length of
+            // a span, but these are totally different approaches. span.len() supposedly uses a more accurate approach,
+            // so we should consider switching to that throughout. But, to keep this code self-consistent it uses only
+            // the graphemes approach.
+            let chars = span.content.graphemes(true);
+            let len = chars.clone().count();
+
+            if start > 0 && len < start {
+                start -= len;
+                continue;
+            }
+
+            let end = std::cmp::min(len, start + width);
+
+            if start != 0 || end != len {
+                span.content = chars.skip(start).take(end - start).collect();
+            }
+            self.0.push(span);
+
+            width -= end - start;
+            start = 0;
+
+            if width == 0 {
+                break;
+            }
         }
     }
 
@@ -247,6 +281,31 @@ mod tests {
 
         new_test.truncate_line(0);
         assert_eq!(new_test, Line::default());
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_trim_ends() -> anyhow::Result<()> {
+        let line = |spans: &[&str]| -> anyhow::Result<Line> { spans.to_vec().try_into() };
+        let mut test = line(&["hello", "cat", "world"])?;
+        test.trim_ends(0, 15);
+        assert_eq!(test, line(&["hello", "cat", "world"])?);
+
+        test.trim_ends(0, 13);
+        assert_eq!(test, line(&["hello", "cat", "world"])?);
+
+        let mut test = line(&["hello", "cat", "world"])?;
+        test.trim_ends(2, 10);
+        assert_eq!(test, line(&["llo", "cat", "worl"])?);
+
+        let mut test = line(&["hello", "cat", "world"])?;
+        test.trim_ends(6, 2);
+        assert_eq!(test, line(&["at"])?);
+
+        let mut test = line(&["hello", "cat", "world"])?;
+        test.trim_ends(9, 2);
+        assert_eq!(test, line(&["or"])?);
 
         Ok(())
     }

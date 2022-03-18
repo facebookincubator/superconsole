@@ -48,7 +48,6 @@ impl Builder {
         self.build_inner(root, Some(default_size))
     }
 
-
     fn build_inner(
         &self,
         root: Box<dyn Component>,

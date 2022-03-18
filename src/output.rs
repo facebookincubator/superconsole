@@ -55,7 +55,6 @@ impl SuperConsoleOutput for BlockingSuperConsoleOutput {
         Ok(())
     }
 
-
     fn as_any(&self) -> &dyn Any {
         self
     }

@@ -6,7 +6,7 @@ The design choices that underly superconsole are selected to prioritize testabil
 
 Superconsole also offers stylization, including italics, underlining, bolding, and coloring text.  Furthermore, relying on crossterm ensures that it is compatible with Windows, Unix, and MacOS.
 
-Finally, superconsole delineates between rendering logic and program state - each render call acceps an immutable reference to state, which components may use to inject state into their otherwise immutable rendering logic.
+Finally, superconsole delineates between rendering logic and program state - each render call accepts an immutable reference to state, which components may use to inject state into their otherwise immutable rendering logic.
 
 ## Demo
 

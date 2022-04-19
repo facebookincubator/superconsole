@@ -22,6 +22,8 @@ gazebo_lint = { version = "0.1", optional = true } # @oss-enable
 thiserror = "1"
 termwiz = "0.15"
 crossbeam-channel = "0.5"
+# 0.9.8 is only compatible with nightly 1.61
+crossbeam-epoch = "=0.9.7"
 
 [features]
 # @oss-disable: default = ["gazebo_lint"]

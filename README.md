@@ -12,7 +12,6 @@ Finally, superconsole delineates between rendering logic and program state - eac
 
 ![Superconsole running some buck2 tests](demo.gif)
 
-
 ## Examples
 
 ```rust

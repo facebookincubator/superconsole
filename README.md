@@ -1,5 +1,7 @@
 # A component-based framework for building Rust TUIs
 
+There are several copies of this repo on GitHub, [https://github.com/facebookincubator/superconsole](facebookincubator/superconsole) is the canonical one.
+
 The superconsole framework provides a powerful line based abstraction over text based rendering to the terminal.  It also provides basic building blocks like line manipulation, and a higher level of composable components.  A base set of "batteries" components are included to help developers create TUIs as quickly as possible.
 
 The design choices that underly superconsole are selected to prioritize testability, ease of composition, and flexibility.

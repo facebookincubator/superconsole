@@ -17,8 +17,9 @@ itertools = "0.10"
 unicode-segmentation = "1.7"
 gazebo.version = "0.6.0"
 # @oss-disable: gazebo.path = "../gazebo/gazebo"
-# @oss-disable: gazebo_lint = { path = "../gazebo_lint/gazebo_lint", optional = true }
-gazebo_lint = { version = "0.1", optional = true } # @oss-enable
+gazebo_lint.version = "0.1"
+gazebo_lint.optional = true
+# @oss-disable: gazebo_lint.path = "../gazebo_lint/gazebo_lint"
 thiserror = "1"
 termwiz = "0.15"
 crossbeam-channel = "0.5"

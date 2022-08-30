@@ -48,8 +48,13 @@ pub struct SuperConsole {
 impl SuperConsole {
     /// Build a new SuperConsole with a root component.
     pub fn new(root: Box<dyn Component>) -> Option<Self> {
-        Self::compatible()
-            .then(|| Self::new_internal(root, None, Box::new(BlockingSuperConsoleOutput)))
+        Self::compatible().then(|| {
+            Self::new_internal(
+                root,
+                None,
+                Box::new(BlockingSuperConsoleOutput::new(Box::new(io::stderr()))),
+            )
+        })
     }
 
     /// Force a new SuperConsole to be built with a root component, regardless of
@@ -58,7 +63,7 @@ impl SuperConsole {
         Self::new_internal(
             root,
             Some(default_size),
-            Box::new(BlockingSuperConsoleOutput),
+            Box::new(BlockingSuperConsoleOutput::new(Box::new(io::stderr()))),
         )
     }
 

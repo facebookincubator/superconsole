@@ -38,7 +38,16 @@ pub trait SuperConsoleOutput: Send + Sync + 'static {
     fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 
-pub(crate) struct BlockingSuperConsoleOutput;
+pub struct BlockingSuperConsoleOutput {
+    /// Stream to write to.
+    stream: Box<dyn Write + Send + 'static + Sync>,
+}
+
+impl BlockingSuperConsoleOutput {
+    pub fn new(stream: Box<dyn Write + Send + 'static + Sync>) -> Self {
+        Self { stream }
+    }
+}
 
 impl SuperConsoleOutput for BlockingSuperConsoleOutput {
     fn should_render(&mut self) -> bool {
@@ -46,10 +55,9 @@ impl SuperConsoleOutput for BlockingSuperConsoleOutput {
     }
 
     fn output(&mut self, buffer: Vec<u8>) -> anyhow::Result<()> {
-        let stderr = io::stderr();
-        let mut handle = stderr.lock();
-        handle.write_all(&buffer)?;
-        handle.flush()?;
+        self.stream.write_all(&buffer)?;
+        self.stream.flush()?;
+
         Ok(())
     }
 
@@ -82,15 +90,11 @@ pub(crate) struct NonBlockingSuperConsoleOutput {
 }
 
 impl NonBlockingSuperConsoleOutput {
-    pub fn new() -> anyhow::Result<Self> {
-        Self::new_for_writer(io::stderr)
+    pub fn new(stream: Box<dyn Write + Send + 'static + Sync>) -> anyhow::Result<Self> {
+        Self::new_for_writer(stream)
     }
 
-    fn new_for_writer<F, W>(acquire_writer: F) -> anyhow::Result<Self>
-    where
-        F: Fn() -> W + Send + 'static,
-        W: Write,
-    {
+    fn new_for_writer(mut stream: Box<dyn Write + Send + 'static + Sync>) -> anyhow::Result<Self> {
         let (sender, receiver) = bounded::<Vec<u8>>(1);
         let (error_sender, errors) = unbounded::<io::Error>();
 
@@ -98,9 +102,7 @@ impl NonBlockingSuperConsoleOutput {
             .name("superconsole-io".to_owned())
             .spawn(move || {
                 for frame in receiver.into_iter() {
-                    let mut writer = acquire_writer();
-
-                    match writer.write_all(&frame).and_then(|()| writer.flush()) {
+                    match stream.write_all(&frame).and_then(|()| stream.flush()) {
                         Ok(()) => {}
                         Err(e) => {
                             // This can only fail if the sender disconnected, in which case they'll
@@ -216,7 +218,7 @@ mod test {
     fn test_non_blocking_output_errors_on_next_output() -> anyhow::Result<()> {
         let (writer, drain) = TestWriter::new();
 
-        let mut output = NonBlockingSuperConsoleOutput::new_for_writer(move || writer.clone())?;
+        let mut output = NonBlockingSuperConsoleOutput::new_for_writer(Box::new(writer))?;
 
         // Send a first message, this will go into write()
         assert!(output.should_render());

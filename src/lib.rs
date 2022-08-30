@@ -48,7 +48,7 @@ pub mod components;
 pub mod content;
 mod dimensions;
 mod error;
-mod output;
+pub mod output;
 mod state;
 pub mod style;
 mod superconsole;

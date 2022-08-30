@@ -7,6 +7,9 @@
  * of this source tree.
  */
 
+use std::io;
+use std::io::Write;
+
 use crate::components::Component;
 use crate::output::BlockingSuperConsoleOutput;
 use crate::output::NonBlockingSuperConsoleOutput;
@@ -17,12 +20,14 @@ use crate::SuperConsole;
 /// A builder to create SuperConsole, with more options.
 pub struct Builder {
     non_blocking: bool,
+    stream: Box<dyn Write + Send + 'static + Sync>,
 }
 
 impl Builder {
     pub fn new() -> Self {
         Self {
             non_blocking: false,
+            stream: Box::new(io::stderr()),
         }
     }
 
@@ -32,8 +37,14 @@ impl Builder {
         self
     }
 
+    /// Write to a different I/O
+    pub fn write_to(&mut self, stream: Box<dyn Write + Send + 'static + Sync>) -> &mut Self {
+        self.stream = stream;
+        self
+    }
+
     /// Build a new SuperConsole if stderr is a TTY.
-    pub fn build(&self, root: Box<dyn Component>) -> anyhow::Result<Option<SuperConsole>> {
+    pub fn build(self, root: Box<dyn Component>) -> anyhow::Result<Option<SuperConsole>> {
         if !SuperConsole::compatible() {
             return Ok(None);
         }
@@ -42,7 +53,7 @@ impl Builder {
 
     /// Build a new SuperConsole regardless of whether stderr is a TTY.
     pub fn build_forced(
-        &self,
+        self,
         root: Box<dyn Component>,
         default_size: Dimensions,
     ) -> anyhow::Result<SuperConsole> {
@@ -50,7 +61,7 @@ impl Builder {
     }
 
     fn build_inner(
-        &self,
+        self,
         root: Box<dyn Component>,
         default_size: Option<Dimensions>,
     ) -> anyhow::Result<SuperConsole> {
@@ -61,11 +72,11 @@ impl Builder {
         ))
     }
 
-    fn output(&self) -> anyhow::Result<Box<dyn SuperConsoleOutput>> {
+    fn output(self) -> anyhow::Result<Box<dyn SuperConsoleOutput>> {
         if self.non_blocking {
-            Ok(Box::new(NonBlockingSuperConsoleOutput::new()?))
+            Ok(Box::new(NonBlockingSuperConsoleOutput::new(self.stream)?))
         } else {
-            Ok(Box::new(BlockingSuperConsoleOutput))
+            Ok(Box::new(BlockingSuperConsoleOutput::new(self.stream)))
         }
     }
 }

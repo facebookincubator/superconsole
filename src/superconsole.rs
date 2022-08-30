@@ -42,7 +42,7 @@ pub struct SuperConsole {
     // from the terminal. This generally is only used for testing
     // situations.
     default_size: Option<Dimensions>,
-    pub(crate) output: Box<dyn SuperConsoleOutput>,
+    pub output: Box<dyn SuperConsoleOutput>,
 }
 
 impl SuperConsole {

@@ -133,12 +133,16 @@ impl SuperConsole {
     }
 
     fn size(&self) -> anyhow::Result<Dimensions> {
-        match terminal::size() {
-            Ok(size) => Ok(size.into()),
-            Err(e) => match self.default_size {
-                Some(default) => Ok(default),
-                None => Err(e.into()),
-            },
+        // We want to get the size, but if that fails (e.g. during tests) use the default_size if available.
+        // On CircleCI the size returns (0,0) which we also want to fall back with.
+
+        // FIXME: We probably want a mode where the size is forced, not dependent on the environment,
+        // so we can have isolated tests.
+        match (terminal::size(), self.default_size) {
+            (Ok((width, height)), Some(default)) if width == 0 || height == 0 => Ok(default),
+            (Ok(size), _) => Ok(size.into()),
+            (Err(_), Some(default)) => Ok(default),
+            (Err(e), None) => Err(e.into()),
         }
     }
 

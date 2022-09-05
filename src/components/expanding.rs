@@ -60,7 +60,10 @@ mod tests {
     #[test]
     fn test() -> anyhow::Result<()> {
         let expander = Expanding::new(Box::new(Echo::<Lines>::new(false)));
-        let dims = Dimensions { x: 20, y: 20 };
+        let dims = Dimensions {
+            width: 20,
+            height: 20,
+        };
 
         let longest_line: Line = vec!["Hello world"].try_into()?;
         let msg: Lines = vec![longest_line.clone(), vec!["foobar"].try_into()?];
@@ -89,8 +92,8 @@ mod tests {
         let expected = {
             let mut expected = msg;
             expected.set_lines_to_exact_dimensions(Dimensions {
-                x: longest_line.len(),
-                y: 2,
+                width: longest_line.len(),
+                height: 2,
             });
             expected
         };

@@ -111,7 +111,7 @@ impl Component for Bordered {
     fn draw_unchecked(
         &self,
         state: &State,
-        Dimensions { x, y }: Dimensions,
+        Dimensions { width, height }: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {
         // Reserve enough draw space for the walls.
@@ -120,8 +120,8 @@ impl Component for Bordered {
             None => 0,
         };
         let new_dims = Dimensions {
-            x: x.saturating_sub(opt_len(&self.left) + opt_len(&self.right)),
-            y: y.saturating_sub(opt_len(&self.top) + opt_len(&self.bottom)),
+            width: width.saturating_sub(opt_len(&self.left) + opt_len(&self.right)),
+            height: height.saturating_sub(opt_len(&self.top) + opt_len(&self.bottom)),
         };
 
         // The [`Aligned`] box ensures that the child is justified and bounded.

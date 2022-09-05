@@ -14,11 +14,13 @@ use gazebo::prelude::*;
 use crate::content::LinesExt;
 use crate::Line;
 
-/// Denotes an x by y area.  Passed to [`Component`](crate::Component)s to give valid drawing area.
+/// Denotes a rectangular area.
+///
+/// Passed to [`Component`](crate::Component)s to give valid drawing area.
 #[derive(Debug, Copy, Clone, Dupe, Eq, PartialEq, Default)]
 pub struct Dimensions {
-    pub x: usize,
-    pub y: usize,
+    pub width: usize,
+    pub height: usize,
 }
 
 /// Denotes a particular axis (x or y).  Used for several Components which are generalized over direction.
@@ -31,27 +33,27 @@ pub enum Direction {
 impl From<(u16, u16)> for Dimensions {
     fn from((x, y): (u16, u16)) -> Self {
         Self {
-            x: x.into(),
-            y: y.into(),
+            width: x.into(),
+            height: y.into(),
         }
     }
 }
 
 impl From<(usize, usize)> for Dimensions {
-    fn from((x, y): (usize, usize)) -> Self {
-        Self { x, y }
+    fn from((width, height): (usize, usize)) -> Self {
+        Self { width, height }
     }
 }
 
 impl Dimensions {
-    pub fn new(x: usize, y: usize) -> Self {
-        Self { x, y }
+    pub fn new(width: usize, height: usize) -> Self {
+        Self { width, height }
     }
 
     pub fn dimension(self, direction: Direction) -> usize {
         match direction {
-            Direction::Horizontal => self.x,
-            Direction::Vertical => self.y,
+            Direction::Horizontal => self.width,
+            Direction::Vertical => self.height,
         }
     }
 
@@ -63,29 +65,29 @@ impl Dimensions {
             result as usize // this might not be an exact dimension.
         }
 
-        let Self { x, y } = self;
+        let Self { width, height } = self;
         match direction {
             Direction::Horizontal => Self {
-                x: mul(x, multiplicand),
-                y,
+                width: mul(width, multiplicand),
+                height,
             },
             Direction::Vertical => Self {
-                x,
-                y: mul(y, multiplicand),
+                width,
+                height: mul(height, multiplicand),
             },
         }
     }
 
     pub fn saturating_sub(self, subtractor: usize, direction: Direction) -> Self {
-        let Self { x, y } = self;
+        let Self { width, height } = self;
         match direction {
             Direction::Horizontal => Self {
-                x: x.saturating_sub(subtractor),
-                y,
+                width: width.saturating_sub(subtractor),
+                height,
             },
             Direction::Vertical => Self {
-                x,
-                y: y.saturating_sub(subtractor),
+                width,
+                height: height.saturating_sub(subtractor),
             },
         }
     }
@@ -102,24 +104,24 @@ impl Dimensions {
     }
 
     /// Returns the smallest bounding box that fits in both dimensions.
-    pub fn intersect(self, Self { x, y }: Self) -> Self {
+    pub fn intersect(self, Self { width, height }: Self) -> Self {
         Self {
-            x: cmp::min(self.x, x),
-            y: cmp::min(self.y, y),
+            width: cmp::min(self.width, width),
+            height: cmp::min(self.height, height),
         }
     }
 
     /// Returns the smallest bounding box in which both Dimensions fit.
-    pub fn union(self, Self { x, y }: Self) -> Self {
+    pub fn union(self, Self { width, height }: Self) -> Self {
         Self {
-            x: cmp::max(self.x, x),
-            y: cmp::max(self.y, y),
+            width: cmp::max(self.width, width),
+            height: cmp::max(self.height, height),
         }
     }
 
     /// Returns true iff the passed dimension is smaller than or equal to in both dimensions.
-    pub fn contains(self, Self { x, y }: Self) -> bool {
-        x <= self.x && y <= self.y
+    pub fn contains(self, Self { width, height }: Self) -> bool {
+        width <= self.width && height <= self.height
     }
 }
 
@@ -129,24 +131,54 @@ mod tests {
 
     #[test]
     fn test_intersect() {
-        let lhs = Dimensions { x: 5, y: 10 };
-        let rhs = Dimensions { x: 8, y: 3 };
+        let lhs = Dimensions {
+            width: 5,
+            height: 10,
+        };
+        let rhs = Dimensions {
+            width: 8,
+            height: 3,
+        };
         let intersect = lhs.intersect(rhs);
-        assert_eq!(intersect, Dimensions { x: 5, y: 3 });
+        assert_eq!(
+            intersect,
+            Dimensions {
+                width: 5,
+                height: 3
+            }
+        );
     }
 
     #[test]
     fn test_union() {
-        let lhs = Dimensions { x: 5, y: 10 };
-        let rhs = Dimensions { x: 8, y: 3 };
+        let lhs = Dimensions {
+            width: 5,
+            height: 10,
+        };
+        let rhs = Dimensions {
+            width: 8,
+            height: 3,
+        };
         let union = lhs.union(rhs);
-        assert_eq!(union, Dimensions { x: 8, y: 10 });
+        assert_eq!(
+            union,
+            Dimensions {
+                width: 8,
+                height: 10
+            }
+        );
     }
 
     #[test]
     fn test_contains() {
-        let lhs = Dimensions { x: 8, y: 10 };
-        let rhs = Dimensions { x: 5, y: 3 };
+        let lhs = Dimensions {
+            width: 8,
+            height: 10,
+        };
+        let rhs = Dimensions {
+            width: 5,
+            height: 3,
+        };
         assert!(lhs.contains(rhs));
         assert!(!rhs.contains(lhs));
         assert!(lhs.contains(lhs));

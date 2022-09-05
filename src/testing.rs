@@ -73,7 +73,10 @@ impl SuperConsoleTestingExt for SuperConsole {
 pub fn test_console(root: Box<dyn Component>) -> SuperConsole {
     SuperConsole::new_internal(
         Box::new(Canvas::new(root)),
-        Some(Dimensions { x: 80, y: 80 }),
+        Some(Dimensions {
+            width: 80,
+            height: 80,
+        }),
         Box::new(TestOutput {
             should_render: true,
             frames: Vec::new(),

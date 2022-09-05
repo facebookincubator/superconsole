@@ -26,8 +26,8 @@ impl Bounded {
         Self {
             child,
             max_size: Dimensions {
-                x: max_x.unwrap_or(usize::MAX),
-                y: max_y.unwrap_or(usize::MAX),
+                width: max_x.unwrap_or(usize::MAX),
+                height: max_y.unwrap_or(usize::MAX),
             },
         }
     }
@@ -65,7 +65,10 @@ mod tests {
         let msg = Msg(vec![crate::line!(Span::new_unstyled("hello world")?)]);
         let output = test.draw(
             &crate::state![&msg],
-            Dimensions { x: 50, y: 50 },
+            Dimensions {
+                width: 50,
+                height: 50,
+            },
             DrawMode::Normal,
         )?;
         let expected = msg.0;
@@ -84,7 +87,10 @@ mod tests {
         ]);
         let output = test.draw(
             &crate::state![&msg],
-            Dimensions { x: 50, y: 50 },
+            Dimensions {
+                width: 50,
+                height: 50,
+            },
             DrawMode::Normal,
         )?;
         let expected = vec![crate::line!(Span::new_unstyled("he")?)];

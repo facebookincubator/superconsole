@@ -261,8 +261,8 @@ impl LinesExt for Vec<Line> {
 
     fn shrink_lines_to_dimensions(&mut self, dimensions: Dimensions) {
         self.iter_mut()
-            .for_each(|line| line.truncate_line(dimensions.x as usize));
-        self.truncate(dimensions.y as usize);
+            .for_each(|line| line.truncate_line(dimensions.width as usize));
+        self.truncate(dimensions.height as usize);
     }
 
     fn render(&mut self, writer: &mut Vec<u8>, limit: Option<usize>) -> anyhow::Result<()> {
@@ -282,9 +282,9 @@ impl LinesExt for Vec<Line> {
         Ok((x, y).into())
     }
 
-    fn set_lines_to_exact_dimensions(&mut self, Dimensions { x, y }: Dimensions) {
-        self.set_lines_to_exact_length(y);
-        self.set_lines_to_exact_width(x);
+    fn set_lines_to_exact_dimensions(&mut self, Dimensions { width, height }: Dimensions) {
+        self.set_lines_to_exact_length(height);
+        self.set_lines_to_exact_width(width);
     }
 }
 

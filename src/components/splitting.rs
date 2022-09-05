@@ -84,12 +84,12 @@ impl InternalSplitKind {
                     // bound non-splitting direction, pad splitting direction
                     match direction {
                         Direction::Horizontal => {
-                            output.truncate_lines_bottom(child_dimension.y as usize);
-                            output.set_lines_to_exact_width(child_dimension.x as usize);
+                            output.truncate_lines_bottom(child_dimension.height as usize);
+                            output.set_lines_to_exact_width(child_dimension.width as usize);
                         }
                         Direction::Vertical => {
-                            output.truncate_lines(child_dimension.x as usize);
-                            output.set_lines_to_exact_length(child_dimension.y as usize);
+                            output.truncate_lines(child_dimension.width as usize);
+                            output.set_lines_to_exact_length(child_dimension.height as usize);
                         }
                     }
 

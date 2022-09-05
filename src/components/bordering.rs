@@ -37,10 +37,7 @@ use crate::State;
 #[derive(Debug)]
 pub struct Bordered {
     child: Aligned,
-    pub left: Option<Span>,
-    pub right: Option<Span>,
-    pub top: Option<Span>,
-    pub bottom: Option<Span>,
+    pub border: BorderedSpec,
 }
 
 /// The `BorderedSpec` allows the callee to specify the borders (or lack thereof) of each side.
@@ -70,25 +67,14 @@ impl Default for BorderedSpec {
 }
 
 impl Bordered {
-    pub fn new(
-        child: Box<dyn Component>,
-        BorderedSpec {
-            left,
-            right,
-            top,
-            bottom,
-        }: BorderedSpec,
-    ) -> Self {
+    pub fn new(child: Box<dyn Component>, border: BorderedSpec) -> Self {
         Self {
             child: Aligned {
                 child,
                 horizontal: HorizontalAlignmentKind::Left(true),
                 ..Default::default()
             },
-            left,
-            right,
-            top,
-            bottom,
+            border,
         }
     }
 }
@@ -120,26 +106,26 @@ impl Component for Bordered {
             None => 0,
         };
         let new_dims = Dimensions {
-            width: width.saturating_sub(opt_len(&self.left) + opt_len(&self.right)),
-            height: height.saturating_sub(opt_len(&self.top) + opt_len(&self.bottom)),
+            width: width.saturating_sub(opt_len(&self.border.left) + opt_len(&self.border.right)),
+            height: height.saturating_sub(opt_len(&self.border.top) + opt_len(&self.border.bottom)),
         };
 
         // The [`Aligned`] box ensures that the child is justified and bounded.
         let mut output = self.child.draw(state, new_dims, mode)?;
 
         for line in output.iter_mut() {
-            if let Some(left) = &self.left {
+            if let Some(left) = &self.border.left {
                 line.0.insert(0, left.clone());
             }
-            if let Some(right) = &self.right {
+            if let Some(right) = &self.border.right {
                 line.0.push(right.clone());
             }
         }
-        if let Some(top) = &self.top {
+        if let Some(top) = &self.border.top {
             let lines = construct_vertical_padding(top.clone(), output.max_line_length());
             output.splice(0..0, lines.into_iter());
         }
-        if let Some(bottom) = &self.bottom {
+        if let Some(bottom) = &self.border.bottom {
             let lines = construct_vertical_padding(bottom.clone(), output.max_line_length());
             output.extend(lines.into_iter());
         }

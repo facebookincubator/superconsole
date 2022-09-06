@@ -22,6 +22,8 @@ use crate::Dimensions;
 pub struct TestOutput {
     /// Callers can modify this to indicate whether the output is blocked.
     pub should_render: bool,
+    /// The size to report the terminal
+    pub terminal_size: Dimensions,
     /// The frames that were written to this output.
     pub frames: Vec<Vec<u8>>,
 }
@@ -34,6 +36,10 @@ impl SuperConsoleOutput for TestOutput {
     fn output(&mut self, buffer: Vec<u8>) -> anyhow::Result<()> {
         self.frames.push(buffer);
         Ok(())
+    }
+
+    fn terminal_size(&self) -> anyhow::Result<Dimensions> {
+        Ok(self.terminal_size)
     }
 
     fn finalize(self: Box<Self>) -> anyhow::Result<()> {
@@ -71,14 +77,16 @@ impl SuperConsoleTestingExt for SuperConsole {
 }
 
 pub fn test_console(root: Box<dyn Component>) -> SuperConsole {
+    let size = Dimensions {
+        width: 80,
+        height: 80,
+    };
     SuperConsole::new_internal(
         Box::new(Canvas::new(root)),
-        Some(Dimensions {
-            width: 80,
-            height: 80,
-        }),
+        Some(size),
         Box::new(TestOutput {
             should_render: true,
+            terminal_size: size,
             frames: Vec::new(),
         }),
     )

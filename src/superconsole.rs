@@ -137,11 +137,7 @@ impl SuperConsole {
     }
 
     fn size(&self) -> anyhow::Result<Dimensions> {
-        // We want to get the size, but if that fails (e.g. during tests) use the fallback_size if available.
-        // On CircleCI the size returns (0,0) which we also want to fall back with.
-
-        // FIXME: We probably want a mode where the size is forced, not dependent on the environment,
-        // so we can have isolated tests.
+        // We want to get the size, but if that fails or is empty use the fallback_size if available.
         match (self.output.terminal_size(), self.fallback_size) {
             (Ok(size), Some(fallback)) if size.width == 0 || size.height == 0 => Ok(fallback),
             (Ok(size), _) => Ok(size),

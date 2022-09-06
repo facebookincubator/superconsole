@@ -42,7 +42,7 @@ pub struct SuperConsole {
     // from the terminal. This generally is only used for testing
     // situations.
     fallback_size: Option<Dimensions>,
-    pub output: Box<dyn SuperConsoleOutput>,
+    pub(crate) output: Box<dyn SuperConsoleOutput>,
 }
 
 impl SuperConsole {

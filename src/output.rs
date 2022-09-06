@@ -18,6 +18,8 @@ use crossbeam_channel::unbounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 
+use crate::Dimensions;
+
 pub trait SuperConsoleOutput: Send + Sync + 'static {
     /// Called before rendering will occur. This has a chance to prevent rendering by returning
     /// false.
@@ -26,6 +28,11 @@ pub trait SuperConsoleOutput: Send + Sync + 'static {
     /// Called to produce output. This may be called without should_render if we are finalizing or
     /// clearing. This should flush if possible.
     fn output(&mut self, buffer: Vec<u8>) -> anyhow::Result<()>;
+
+    /// How big is the terminal to write to.
+    fn terminal_size(&self) -> anyhow::Result<Dimensions> {
+        Ok(crossterm::terminal::size()?.into())
+    }
 
     /// Called when the console has finalized. This must block if necessary. No further output will
     /// be emitted.

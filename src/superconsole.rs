@@ -11,7 +11,6 @@ use std::cmp;
 use std::io;
 
 use crossterm::queue;
-use crossterm::terminal;
 use crossterm::terminal::Clear;
 use crossterm::terminal::ClearType;
 use crossterm::tty::IsTty;
@@ -143,11 +142,11 @@ impl SuperConsole {
 
         // FIXME: We probably want a mode where the size is forced, not dependent on the environment,
         // so we can have isolated tests.
-        match (terminal::size(), self.fallback_size) {
-            (Ok((width, height)), Some(fallback)) if width == 0 || height == 0 => Ok(fallback),
-            (Ok(size), _) => Ok(size.into()),
+        match (self.output.terminal_size(), self.fallback_size) {
+            (Ok(size), Some(fallback)) if size.width == 0 || size.height == 0 => Ok(fallback),
+            (Ok(size), _) => Ok(size),
             (Err(_), Some(fallback)) => Ok(fallback),
-            (Err(e), None) => Err(e.into()),
+            (Err(e), None) => Err(e),
         }
     }
 

@@ -41,7 +41,7 @@ pub struct SuperConsole {
     // A default screen size to use if the size cannot be fetched
     // from the terminal. This generally is only used for testing
     // situations.
-    default_size: Option<Dimensions>,
+    fallback_size: Option<Dimensions>,
     pub output: Box<dyn SuperConsoleOutput>,
 }
 
@@ -59,23 +59,23 @@ impl SuperConsole {
 
     /// Force a new SuperConsole to be built with a root component, regardless of
     /// whether the tty is compatible
-    pub fn forced_new(root: Box<dyn Component>, default_size: Dimensions) -> Self {
+    pub fn forced_new(root: Box<dyn Component>, fallback_size: Dimensions) -> Self {
         Self::new_internal(
             root,
-            Some(default_size),
+            Some(fallback_size),
             Box::new(BlockingSuperConsoleOutput::new(Box::new(io::stderr()))),
         )
     }
 
     pub(crate) fn new_internal(
         root: Box<dyn Component>,
-        default_size: Option<Dimensions>,
+        fallback_size: Option<Dimensions>,
         output: Box<dyn SuperConsoleOutput>,
     ) -> Self {
         Self {
             root: Canvas::new(root),
             to_emit: Vec::new(),
-            default_size,
+            fallback_size,
             output,
         }
     }
@@ -133,15 +133,15 @@ impl SuperConsole {
     }
 
     fn size(&self) -> anyhow::Result<Dimensions> {
-        // We want to get the size, but if that fails (e.g. during tests) use the default_size if available.
+        // We want to get the size, but if that fails (e.g. during tests) use the fallback_size if available.
         // On CircleCI the size returns (0,0) which we also want to fall back with.
 
         // FIXME: We probably want a mode where the size is forced, not dependent on the environment,
         // so we can have isolated tests.
-        match (terminal::size(), self.default_size) {
-            (Ok((width, height)), Some(default)) if width == 0 || height == 0 => Ok(default),
+        match (terminal::size(), self.fallback_size) {
+            (Ok((width, height)), Some(fallback)) if width == 0 || height == 0 => Ok(fallback),
             (Ok(size), _) => Ok(size.into()),
-            (Err(_), Some(default)) => Ok(default),
+            (Err(_), Some(fallback)) => Ok(fallback),
             (Err(e), None) => Err(e.into()),
         }
     }

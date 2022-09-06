@@ -55,19 +55,19 @@ impl Builder {
     pub fn build_forced(
         self,
         root: Box<dyn Component>,
-        default_size: Dimensions,
+        fallback_size: Dimensions,
     ) -> anyhow::Result<SuperConsole> {
-        self.build_inner(root, Some(default_size))
+        self.build_inner(root, Some(fallback_size))
     }
 
     fn build_inner(
         self,
         root: Box<dyn Component>,
-        default_size: Option<Dimensions>,
+        fallback_size: Option<Dimensions>,
     ) -> anyhow::Result<SuperConsole> {
         Ok(SuperConsole::new_internal(
             root,
-            default_size,
+            fallback_size,
             self.output()?,
         ))
     }

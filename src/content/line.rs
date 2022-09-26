@@ -179,6 +179,11 @@ impl Line {
 
         Ok(())
     }
+
+    /// Concatenate spans, discarding any styling.
+    pub fn to_unstyled(&self) -> String {
+        self.0.iter().map(|span| span.content.as_str()).collect()
+    }
 }
 
 impl FromIterator<Span> for Line {

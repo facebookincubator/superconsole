@@ -11,7 +11,6 @@ use std::borrow::Cow;
 
 use crossterm::queue;
 use crossterm::style::ContentStyle;
-use crossterm::style::Print;
 use crossterm::style::PrintStyledContent;
 use crossterm::style::StyledContent;
 use termwiz::cell;
@@ -26,7 +25,7 @@ use crate::Error;
 #[non_exhaustive]
 pub struct Span {
     pub(crate) content: String,
-    pub stylization: Option<ContentStyle>,
+    pub stylization: ContentStyle,
 }
 
 impl PartialEq for Span {
@@ -46,17 +45,11 @@ impl PartialEq for Span {
         fn stylizations_eq(lhs: &Span, rhs: &Span) -> bool {
             let ignore_foreground_color = || lhs.is_padding() || rhs.is_padding();
 
-            match (&lhs.stylization, &rhs.stylization) {
-                (None, None) => true,
-                (None, Some(other)) | (Some(other), None) => {
-                    Span::is_unstyled(other, ignore_foreground_color())
-                }
-                (Some(lhs), Some(rhs)) => {
-                    (lhs.foreground_color == rhs.foreground_color || ignore_foreground_color())
-                        && lhs.background_color == rhs.background_color
-                        && lhs.attributes == rhs.attributes
-                }
-            }
+            let lhs = lhs.stylization;
+            let rhs = rhs.stylization;
+            (lhs.foreground_color == rhs.foreground_color || ignore_foreground_color())
+                && lhs.background_color == rhs.background_color
+                && lhs.attributes == rhs.attributes
         }
         self.iter()
             .zip(other.iter())
@@ -84,12 +77,6 @@ impl Span {
         !stringlike.contains(|c: char| !char_valid(c))
     }
 
-    fn is_unstyled(style: &ContentStyle, is_padding: bool) -> bool {
-        style.attributes.is_empty()
-            && style.background_color.is_none()
-            && (style.foreground_color.is_none() || is_padding)
-    }
-
     fn is_padding(&self) -> bool {
         self.content.as_bytes().iter().all(u8::is_ascii_whitespace)
     }
@@ -98,7 +85,7 @@ impl Span {
         let content = sanitize(string);
         Span {
             content,
-            stylization: None,
+            stylization: ContentStyle::default(),
         }
     }
 
@@ -110,7 +97,7 @@ impl Span {
     pub fn padding(amount: usize) -> Self {
         Self {
             content: format!("{:<width$}", "", width = amount),
-            stylization: None,
+            stylization: ContentStyle::default(),
         }
     }
 
@@ -121,7 +108,7 @@ impl Span {
         if Self::valid(&owned) {
             Ok(Self {
                 content: owned,
-                stylization: None,
+                stylization: ContentStyle::default(),
             })
         } else {
             Err(Error::InvalidWhitespace(owned).into())
@@ -132,7 +119,7 @@ impl Span {
         let content = sanitize(stringlike);
         Self {
             content,
-            stylization: None,
+            stylization: ContentStyle::default(),
         }
     }
 
@@ -142,7 +129,7 @@ impl Span {
         if Self::valid(content.content()) {
             Ok(Self {
                 content: content.content().clone(),
-                stylization: Some(*content.style()),
+                stylization: *content.style(),
             })
         } else {
             Err(Error::InvalidWhitespace(content.content().to_owned()).into())
@@ -154,7 +141,7 @@ impl Span {
         let content = sanitize(span.content());
         Self {
             content,
-            stylization: Some(*span.style()),
+            stylization: *span.style(),
         }
     }
 
@@ -177,18 +164,10 @@ impl Span {
     }
 
     pub(crate) fn render(self, writer: &mut Vec<u8>) -> anyhow::Result<()> {
-        match self.stylization {
-            Some(style) => {
-                queue!(
-                    writer,
-                    PrintStyledContent(StyledContent::new(style, self.content))
-                )?;
-            }
-            None => {
-                queue!(writer, Print(self.content))?;
-            }
-        }
-
+        queue!(
+            writer,
+            PrintStyledContent(StyledContent::new(self.stylization, self.content))
+        )?;
         Ok(())
     }
 }
@@ -217,7 +196,7 @@ impl TryFrom<StyledContent<String>> for Span {
     }
 }
 
-pub struct SpanIterator<'a>(&'a Option<ContentStyle>, Graphemes<'a>);
+pub struct SpanIterator<'a>(&'a ContentStyle, Graphemes<'a>);
 
 impl<'a> Iterator for SpanIterator<'a> {
     type Item = Span;

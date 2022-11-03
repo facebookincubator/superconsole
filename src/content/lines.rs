@@ -293,7 +293,6 @@ impl LinesExt for Vec<Line> {
 mod tests {
     use crossterm::style::Attribute;
     use crossterm::style::Color;
-    use gazebo::prelude::*;
 
     use super::*;
 
@@ -563,11 +562,22 @@ strips out {bs}invalid control sequences",
                 "strips out invalid control sequences",
             )],
         ];
-        let expected: Lines = expected.into_map(|spans| {
-            Line(spans.map(|sc| {
-                Span::new_styled_lossy(StyledContent::new(*sc.style(), (*sc.content()).to_owned()))
-            }))
-        });
+        let expected: Lines = expected
+            .into_iter()
+            .map(|spans| {
+                Line(
+                    spans
+                        .iter()
+                        .map(|sc| {
+                            Span::new_styled_lossy(StyledContent::new(
+                                *sc.style(),
+                                (*sc.content()).to_owned(),
+                            ))
+                        })
+                        .collect(),
+                )
+            })
+            .collect();
 
         let lines = colored_lines_from_multiline_string(&test_string);
 

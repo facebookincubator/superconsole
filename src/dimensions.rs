@@ -9,22 +9,20 @@
 
 use std::cmp;
 
-use gazebo::prelude::*;
-
 use crate::content::LinesExt;
 use crate::Line;
 
 /// Denotes a rectangular area.
 ///
 /// Passed to [`Component`](crate::Component)s to give valid drawing area.
-#[derive(Debug, Copy, Clone, Dupe, Eq, PartialEq, Default)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub struct Dimensions {
     pub width: usize,
     pub height: usize,
 }
 
 /// Denotes a particular axis (x or y).  Used for several Components which are generalized over direction.
-#[derive(Debug, Copy, Clone, Dupe, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Direction {
     Horizontal,
     Vertical,

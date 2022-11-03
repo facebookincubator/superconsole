@@ -10,7 +10,6 @@
 //! Splitting is one of the most primitive building blocks of a fully featured UI.
 //! This module contains components and enums that allow for splits along either dimension.
 
-use gazebo::prelude::*;
 use itertools::Itertools;
 
 use crate::content::LinesExt;
@@ -51,7 +50,7 @@ impl SplitKind {
                 );
 
                 let total: f64 = sizes.iter().sum();
-                let normalized_sizes = sizes.into_map(|size| size / total);
+                let normalized_sizes = sizes.into_iter().map(|size| size / total).collect();
 
                 InternalSplitKind::SizedNormalized(normalized_sizes)
             }
@@ -98,16 +97,19 @@ impl InternalSplitKind {
                 .collect(),
             InternalSplitKind::Adaptive => {
                 let mut available = dimensions;
-                children.try_map(|child| {
-                    let mut output = child.draw(state, available, mode)?;
-                    output.shrink_lines_to_dimensions(dimensions);
+                children
+                    .iter()
+                    .map(|child| {
+                        let mut output = child.draw(state, available, mode)?;
+                        output.shrink_lines_to_dimensions(dimensions);
 
-                    // decrease size by however much was just used
-                    let used = Dimensions::dimension_from_output_truncated(&output, direction);
-                    available = available.saturating_sub(used, direction);
+                        // decrease size by however much was just used
+                        let used = Dimensions::dimension_from_output_truncated(&output, direction);
+                        available = available.saturating_sub(used, direction);
 
-                    Ok(output)
-                })
+                        Ok(output)
+                    })
+                    .collect()
             }
         }
     }

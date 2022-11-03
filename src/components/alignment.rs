@@ -12,8 +12,6 @@
 //! One may align text left, center, or right, and top, middle, or bottom.
 //! Additionally, horizontally left aligned text may be optionally justified.
 
-use gazebo::prelude::*;
-
 use crate::components::Blank;
 use crate::content::LinesExt;
 use crate::Component;
@@ -23,7 +21,7 @@ use crate::Line;
 use crate::State;
 
 /// Select the alignment of the vertical content
-#[derive(Debug, Eq, PartialEq, Clone, Dupe, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum VerticalAlignmentKind {
     /// Content appears at the top.
     Top,
@@ -34,7 +32,7 @@ pub enum VerticalAlignmentKind {
 }
 
 /// Select the alignment of the horizontal content
-#[derive(Debug, Eq, PartialEq, Clone, Dupe, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum HorizontalAlignmentKind {
     /// Content appears at the left.
     /// The argument determines whether the text is justified.

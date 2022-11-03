@@ -19,7 +19,6 @@ pub use bounding::Bounded;
 pub(crate) use canvas::Canvas;
 pub use echo::Echo;
 pub use expanding::Expanding;
-use gazebo::prelude::*;
 pub use padding::Padded;
 pub use splitting::Split;
 
@@ -39,7 +38,7 @@ pub mod padding;
 pub mod splitting;
 
 /// Used to mark whether a draw is final.
-#[derive(Debug, Copy, Dupe, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum DrawMode {
     Normal,
     Final,

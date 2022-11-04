@@ -8,6 +8,7 @@
  */
 
 use std::cmp;
+use std::env;
 use std::io;
 
 use crossterm::queue;
@@ -82,7 +83,13 @@ impl SuperConsole {
     pub fn compatible() -> bool {
         // Superconsole only renders on the stderr, so we can display the superconsole
         // even if someone does `command > out.txt`.
-        io::stderr().is_tty()
+        io::stderr().is_tty() && !Self::is_term_dumb()
+    }
+
+    fn is_term_dumb() -> bool {
+        // Some terminals (e.g. Emacs' eshell) are very limited in functionality and don't support
+        // the control codes required for superconsole to work.
+        matches!(env::var("TERM"), Ok(kind) if kind == "dumb")
     }
 
     /// Render at a given tick.  Draws all components and drains the emitted events buffer.

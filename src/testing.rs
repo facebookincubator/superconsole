@@ -92,7 +92,8 @@ pub fn test_console(root: Box<dyn Component>) -> SuperConsole {
     )
 }
 
-pub fn frame_contains(frame: &[u8], needle: &[u8]) -> bool {
+pub fn frame_contains(frame: &[u8], needle: impl AsRef<[u8]>) -> bool {
+    let needle = needle.as_ref();
     for w in frame.windows(needle.len()) {
         if w == needle {
             return true;

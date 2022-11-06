@@ -325,9 +325,9 @@ mod tests {
             .pop()
             .context("No frame was emitted")?;
 
-        assert!(frame_contains(&frame, "state".as_bytes()));
-        assert!(frame_contains(&frame, "line 1".as_bytes()));
-        assert!(frame_contains(&frame, "line 2".as_bytes()));
+        assert!(frame_contains(&frame, "state"));
+        assert!(frame_contains(&frame, "line 1"));
+        assert!(frame_contains(&frame, "line 2"));
 
         Ok(())
     }
@@ -352,9 +352,9 @@ mod tests {
             .pop()
             .context("No frame was emitted")?;
 
-        assert!(frame_contains(&frame, "state".as_bytes()));
-        assert!(frame_contains(&frame, "line 1".as_bytes()));
-        assert!(frame_contains(&frame, "line 2".as_bytes()));
+        assert!(frame_contains(&frame, "state"));
+        assert!(frame_contains(&frame, "line 1"));
+        assert!(frame_contains(&frame, "line 2"));
 
         Ok(())
     }

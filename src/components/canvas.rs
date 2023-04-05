@@ -12,6 +12,7 @@
 //! Do not make this somewhere down the component hierarchy unless you have a good reason for it.
 
 use std::cell::Cell;
+use std::fmt::Debug;
 
 use crossterm::cursor::MoveToColumn;
 use crossterm::cursor::MoveUp;
@@ -24,17 +25,16 @@ use crate::components::Dimensions;
 use crate::components::DrawMode;
 use crate::Component;
 use crate::Line;
-use crate::State;
 
 /// The root components which manages all other components.
 #[derive(Debug)]
-pub(crate) struct Canvas {
-    child: Box<dyn Component>,
+pub(crate) struct Canvas<S> {
+    child: Box<dyn Component<S>>,
     // used to overwrite previous canvas buffer
     len: Cell<u16>,
 }
 
-impl Default for Canvas {
+impl<S: Debug> Default for Canvas<S> {
     fn default() -> Self {
         Self {
             child: Box::new(Blank),
@@ -43,13 +43,13 @@ impl Default for Canvas {
     }
 }
 
-impl Component for Canvas {
+impl<S: Debug> Component<S> for Canvas<S> {
     /// A passthrough method that resizes the Canvas to reflect the size of the root.
     /// Allows dynamic resizing.
     /// Cuts off any lines that are too for long a single row
-    fn draw_unchecked(
+    fn draw_unchecked<'a>(
         &self,
-        state: &State,
+        state: &'a S,
         dimensions: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {
@@ -59,10 +59,10 @@ impl Component for Canvas {
     }
 }
 
-impl Canvas {
+impl<S: Debug> Canvas<S> {
     /// Canvas only has a single child.
     /// It essentially functions as a passthrough - an invisible window which handles sizing and re-drawing correctly.
-    pub(crate) fn new(child: Box<dyn Component>) -> Self {
+    pub(crate) fn new(child: Box<dyn Component<S>>) -> Self {
         Self {
             child,
             ..Default::default()

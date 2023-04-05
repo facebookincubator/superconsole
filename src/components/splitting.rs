@@ -10,6 +10,7 @@
 //! Splitting is one of the most primitive building blocks of a fully featured UI.
 //! This module contains components and enums that allow for splits along either dimension.
 
+use std::fmt::Debug;
 use itertools::Itertools;
 
 use crate::content::LinesExt;
@@ -18,7 +19,6 @@ use crate::Dimensions;
 use crate::Direction;
 use crate::DrawMode;
 use crate::Line;
-use crate::State;
 
 /// Controls the way the splitter displays its children.
 #[derive(Clone, Debug)]
@@ -63,11 +63,11 @@ impl SplitKind {
 }
 
 impl InternalSplitKind {
-    pub fn draw(
+    pub fn draw<'a, S: Debug>(
         &self,
-        children: &[Box<dyn Component>],
+        children: &[Box<dyn Component<S>>],
         direction: Direction,
-        state: &State,
+        state: &'a S,
         dimensions: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Vec<Vec<Line>>> {
@@ -118,18 +118,18 @@ impl InternalSplitKind {
 /// [`Splits`](SplitKind) along a given [`direction`](crate::Direction) for its child [`components`](Component).
 /// Child components are truncated to the bounds passed to them.
 #[derive(Debug)]
-pub struct Split {
-    children: Vec<Box<dyn Component>>,
+pub struct Split<S> {
+    children: Vec<Box<dyn Component<S>>>,
     direction: Direction,
     split: InternalSplitKind,
 }
 
-impl Split {
+impl<S> Split<S> {
     /// Preconditions:
     /// * At least one child.
     /// * If Sized, then ratios must sum to approximately 1.
     /// * If Sized, then there must be as many ratios as components
-    pub fn new(children: Vec<Box<dyn Component>>, direction: Direction, split: SplitKind) -> Self {
+    pub fn new(children: Vec<Box<dyn Component<S>>>, direction: Direction, split: SplitKind) -> Self {
         assert!(!children.is_empty(), "Must have at least one child.");
 
         let split = split.to_internal_split_kind(children.len());
@@ -142,10 +142,10 @@ impl Split {
     }
 }
 
-impl Component for Split {
-    fn draw_unchecked(
+impl<S: Debug> Component<S> for Split<S> {
+    fn draw_unchecked<'a>(
         &self,
-        state: &State,
+        state: &'a S,
         dimensions: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {
@@ -204,7 +204,7 @@ mod tests {
     #[derive(AsRef, Debug)]
     struct Echo3(Vec<Line>);
 
-    fn make_splitter(kind: SplitKind, dimension: Direction) -> Split {
+    fn make_splitter<S>(kind: SplitKind, dimension: Direction) -> Split<S> {
         Split::new(
             vec![
                 Box::new(Echo::<Echo1>::new(false)),

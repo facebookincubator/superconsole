@@ -9,6 +9,7 @@
 
 //! Testing utilities for Superconsole.
 use std::any::Any;
+use std::fmt::Debug;
 
 use anyhow::Context as _;
 
@@ -59,7 +60,7 @@ pub trait SuperConsoleTestingExt {
     fn test_output_mut(&mut self) -> anyhow::Result<&mut TestOutput>;
 }
 
-impl SuperConsoleTestingExt for SuperConsole {
+impl<S: Debug> SuperConsoleTestingExt for SuperConsole<S> {
     fn test_output(&self) -> anyhow::Result<&TestOutput> {
         self.output
             .as_any()
@@ -75,7 +76,7 @@ impl SuperConsoleTestingExt for SuperConsole {
     }
 }
 
-pub fn test_console(root: Box<dyn Component>) -> SuperConsole {
+pub fn test_console<S: Debug + 'static>(root: Box<dyn Component<S>>) -> SuperConsole<S> {
     let size = Dimensions {
         width: 80,
         height: 80,

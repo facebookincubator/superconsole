@@ -7,13 +7,14 @@
  * of this source tree.
  */
 
+use std::fmt::Debug;
+
 use crate::components::Blank;
 use crate::components::Dimensions;
 use crate::components::DrawMode;
 use crate::content::LinesExt;
 use crate::Component;
 use crate::Line;
-use crate::State;
 
 /// The `Padded` [`Component`](Component) wraps its child by padding left, right, above, and below its content.
 /// This can be used to shift the content to a different location and ensure that following content comes after a certain distance.
@@ -22,15 +23,15 @@ use crate::State;
 ///
 /// Content is truncated preferentially over padding.
 #[derive(Debug)]
-pub struct Padded {
-    pub child: Box<dyn Component>,
+pub struct Padded<S> {
+    pub child: Box<dyn Component<S>>,
     pub left: usize,
     pub right: usize,
     pub top: usize,
     pub bottom: usize,
 }
 
-impl Default for Padded {
+impl<S: Debug> Default for Padded<S> {
     fn default() -> Self {
         Self {
             child: Box::new(Blank),
@@ -42,9 +43,9 @@ impl Default for Padded {
     }
 }
 
-impl Padded {
+impl<S: Debug> Padded<S> {
     pub fn new(
-        child: Box<dyn Component>,
+        child: Box<dyn Component<S>>,
         left: usize,
         right: usize,
         top: usize,
@@ -60,10 +61,10 @@ impl Padded {
     }
 }
 
-impl Component for Padded {
-    fn draw_unchecked(
+impl<S: Debug> Component<S> for Padded<S> {
+    fn draw_unchecked<'a>(
         &self,
-        state: &State,
+        state: &'a S,
         dimensions: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {

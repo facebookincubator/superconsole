@@ -10,6 +10,7 @@
 use std::cmp;
 use std::env;
 use std::io;
+use std::fmt::Debug;
 
 use crossterm::queue;
 use crossterm::terminal::Clear;
@@ -26,7 +27,6 @@ use crate::output::SuperConsoleOutput;
 use crate::Dimensions;
 use crate::Direction;
 use crate::Lines;
-use crate::State;
 
 const MINIMUM_EMIT: usize = 5;
 const MAX_GRAPHEME_BUFFER: usize = 1000000;
@@ -35,8 +35,8 @@ const MAX_GRAPHEME_BUFFER: usize = 1000000;
 /// A Canvas area at the bottom of the terminal is re-rendered in place at each tick for the components,
 /// while a log area of emitted messages is produced above.
 /// Producing output from sources other than SuperConsole while break the TUI.
-pub struct SuperConsole {
-    root: Canvas,
+pub struct SuperConsole<S: Debug> {
+    root: Canvas<S>,
     to_emit: Vec<Line>,
     // A default screen size to use if the size cannot be fetched
     // from the terminal. This generally is only used for testing
@@ -45,9 +45,9 @@ pub struct SuperConsole {
     pub(crate) output: Box<dyn SuperConsoleOutput>,
 }
 
-impl SuperConsole {
+impl<S: Debug> SuperConsole<S> {
     /// Build a new SuperConsole with a root component.
-    pub fn new(root: Box<dyn Component>) -> Option<Self> {
+    pub fn new(root: Box<dyn Component<S>>) -> Option<Self> {
         Self::compatible().then(|| {
             Self::new_internal(
                 root,
@@ -59,7 +59,7 @@ impl SuperConsole {
 
     /// Force a new SuperConsole to be built with a root component, regardless of
     /// whether the tty is compatible
-    pub fn forced_new(root: Box<dyn Component>, fallback_size: Dimensions) -> Self {
+    pub fn forced_new(root: Box<dyn Component<S>>, fallback_size: Dimensions) -> Self {
         Self::new_internal(
             root,
             Some(fallback_size),
@@ -68,7 +68,7 @@ impl SuperConsole {
     }
 
     pub(crate) fn new_internal(
-        root: Box<dyn Component>,
+        root: Box<dyn Component<S>>,
         fallback_size: Option<Dimensions>,
         output: Box<dyn SuperConsoleOutput>,
     ) -> Self {
@@ -94,7 +94,7 @@ impl SuperConsole {
 
     /// Render at a given tick.  Draws all components and drains the emitted events buffer.
     /// This will produce any pending emitting events above the Canvas and will re-render the drawing area.
-    pub fn render(&mut self, state: &State) -> anyhow::Result<()> {
+    pub fn render<'a>(&mut self, state: &'a S) -> anyhow::Result<()> {
         // `render_general` refuses to drain more than a single frame, so repeat until done.
         // or until the rendered frame is too large to print anything.
         let mut anything_emitted = true;
@@ -115,13 +115,13 @@ impl SuperConsole {
 
     /// Perform a final render with [`DrawMode::Final`].
     /// Each component will have a chance to finalize themselves before the terminal is disposed of.
-    pub fn finalize(self, state: &State) -> anyhow::Result<()> {
+    pub fn finalize<'a>(self, state: &'a S) -> anyhow::Result<()> {
         self.finalize_with_mode(state, DrawMode::Final)
     }
 
     /// Perform a final render, using a specified [`DrawMode`].
     /// Each component will have a chance to finalize themselves before the terminal is disposed of.
-    pub fn finalize_with_mode(mut self, state: &State, mode: DrawMode) -> anyhow::Result<()> {
+    pub fn finalize_with_mode<'a>(mut self, state: &'a S, mode: DrawMode) -> anyhow::Result<()> {
         self.render_with_mode(state, mode)?;
         self.output.finalize()
     }
@@ -132,7 +132,7 @@ impl SuperConsole {
     ///
     /// Because this re-renders the console, it requires passed state.
     /// Overuse of this method can cause `superconsole` to use significant CPU.
-    pub fn emit_now(&mut self, lines: Lines, state: &State) -> anyhow::Result<()> {
+    pub fn emit_now<'a>(&mut self, lines: Lines, state: &'a S) -> anyhow::Result<()> {
         self.emit(lines);
         self.render(state)
     }
@@ -161,7 +161,7 @@ impl SuperConsole {
     }
 
     /// Helper method to share render + finalize behavior by specifying mode.
-    fn render_with_mode(&mut self, state: &State, mode: DrawMode) -> anyhow::Result<()> {
+    fn render_with_mode<'a>(&mut self, state: &'a S, mode: DrawMode) -> anyhow::Result<()> {
         // TODO(cjhopman): We may need to try to keep each write call to be under the pipe buffer
         // size so it can be completed in a single syscall otherwise we might see a partially
         // rendered frame.
@@ -175,10 +175,10 @@ impl SuperConsole {
     }
 
     /// Helper method that makes rendering highly configurable.
-    fn render_general(
+    fn render_general<'a>(
         &mut self,
         buffer: &mut Vec<u8>,
-        state: &State,
+        state: &'a S,
         mode: DrawMode,
         size: Dimensions,
     ) -> anyhow::Result<()> {

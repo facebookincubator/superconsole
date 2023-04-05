@@ -7,6 +7,7 @@
  * of this source tree.
  */
 
+use std::fmt::Debug;
 use std::io;
 use std::io::Write;
 
@@ -50,27 +51,27 @@ impl Builder {
     }
 
     /// Build a new SuperConsole if stderr is a TTY.
-    pub fn build(self, root: Box<dyn Component>) -> anyhow::Result<Option<SuperConsole>> {
-        if !SuperConsole::compatible() {
+    pub fn build<S: Debug>(self, root: Box<dyn Component<S>>) -> anyhow::Result<Option<SuperConsole<S>>> {
+        if !SuperConsole::<S>::compatible() {
             return Ok(None);
         }
         Some(self.build_inner(root, None)).transpose()
     }
 
     /// Build a new SuperConsole regardless of whether stderr is a TTY.
-    pub fn build_forced(
+    pub fn build_forced<S: Debug>(
         self,
-        root: Box<dyn Component>,
+        root: Box<dyn Component<S>>,
         fallback_size: Dimensions,
-    ) -> anyhow::Result<SuperConsole> {
+    ) -> anyhow::Result<SuperConsole<S>> {
         self.build_inner(root, Some(fallback_size))
     }
 
-    fn build_inner(
+    fn build_inner<S: Debug>(
         self,
-        root: Box<dyn Component>,
+        root: Box<dyn Component<S>>,
         fallback_size: Option<Dimensions>,
-    ) -> anyhow::Result<SuperConsole> {
+    ) -> anyhow::Result<SuperConsole<S>> {
         Ok(SuperConsole::new_internal(
             root,
             fallback_size,

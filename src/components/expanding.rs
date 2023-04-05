@@ -8,6 +8,7 @@
  */
 
 use std::cell::Cell;
+use std::fmt::Debug;
 
 use crate::content::LinesExt;
 use crate::Component;
@@ -16,13 +17,13 @@ use crate::Dimensions;
 /// A `Component` which refuses to shrink below it's previous maximum size.
 /// Notably, this component implicitly pads to a rectangle for simplicity.
 #[derive(Debug)]
-pub struct Expanding {
-    child: Box<dyn Component>,
+pub struct Expanding<S> {
+    child: Box<dyn Component<S>>,
     maximum: Cell<Dimensions>,
 }
 
-impl Expanding {
-    pub fn new(child: Box<dyn Component>) -> Self {
+impl<S> Expanding<S> {
+    pub fn new(child: Box<dyn Component<S>>) -> Self {
         Self {
             child,
             maximum: Cell::default(),
@@ -30,10 +31,10 @@ impl Expanding {
     }
 }
 
-impl Component for Expanding {
-    fn draw_unchecked(
+impl<S: Debug> Component<S> for Expanding<S> {
+    fn draw_unchecked<'a>(
         &self,
-        state: &crate::State,
+        state: &'a S,
         dimensions: crate::Dimensions,
         mode: crate::DrawMode,
     ) -> anyhow::Result<Vec<crate::Line>> {

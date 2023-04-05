@@ -7,22 +7,23 @@
  * of this source tree.
  */
 
+use std::fmt::Debug;
+
 use crate::content::LinesExt;
 use crate::Component;
 use crate::Dimensions;
 use crate::DrawMode;
 use crate::Lines;
-use crate::State;
 
 /// Component that ensures its child component has at most `max_size` render space.
 #[derive(Debug)]
-pub struct Bounded {
-    child: Box<dyn Component>,
+pub struct Bounded<S> {
+    child: Box<dyn Component<S>>,
     max_size: Dimensions,
 }
 
-impl Bounded {
-    pub fn new(child: Box<dyn Component>, max_x: Option<usize>, max_y: Option<usize>) -> Self {
+impl<S> Bounded<S> {
+    pub fn new(child: Box<dyn Component<S>>, max_x: Option<usize>, max_y: Option<usize>) -> Self {
         Self {
             child,
             max_size: Dimensions {
@@ -33,10 +34,10 @@ impl Bounded {
     }
 }
 
-impl Component for Bounded {
-    fn draw_unchecked(
+impl<S: Debug> Component<S> for Bounded<S> {
+    fn draw_unchecked<'a>(
         &self,
-        state: &State,
+        state: &'a S,
         dimensions: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Lines> {

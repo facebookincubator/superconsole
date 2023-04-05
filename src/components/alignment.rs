@@ -12,13 +12,14 @@
 //! One may align text left, center, or right, and top, middle, or bottom.
 //! Additionally, horizontally left aligned text may be optionally justified.
 
+use std::fmt::Debug;
+
 use crate::components::Blank;
 use crate::content::LinesExt;
 use crate::Component;
 use crate::Dimensions;
 use crate::DrawMode;
 use crate::Line;
-use crate::State;
 
 /// Select the alignment of the vertical content
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
@@ -47,16 +48,16 @@ pub enum HorizontalAlignmentKind {
 /// The [`HorizontalAlignmentKind`](HorizontalAlignmentKind) enum specifies the location relative to the x-axis.
 /// The [`VerticalAlignmentKind`](VerticalAlignmentKind) enum specified the location relative to the y-axis.
 #[derive(Debug)]
-pub struct Aligned {
-    pub child: Box<dyn Component>,
+pub struct Aligned<S> {
+    pub child: Box<dyn Component<S>>,
     pub horizontal: HorizontalAlignmentKind,
     pub vertical: VerticalAlignmentKind,
 }
 
-impl Aligned {
+impl<S: Debug> Aligned<S> {
     /// Creates a new `Alignment` component with the given alignments.
     pub fn new(
-        child: Box<dyn Component>,
+        child: Box<dyn Component<S>>,
         horizontal: HorizontalAlignmentKind,
         vertical: VerticalAlignmentKind,
     ) -> Self {
@@ -68,7 +69,7 @@ impl Aligned {
     }
 }
 
-impl Default for Aligned {
+impl<S: Debug> Default for Aligned<S> {
     fn default() -> Self {
         Self {
             child: Box::new(Blank),
@@ -78,10 +79,10 @@ impl Default for Aligned {
     }
 }
 
-impl Component for Aligned {
-    fn draw_unchecked(
+impl<S: Debug> Component<S> for Aligned<S> {
+    fn draw_unchecked<'a>(
         &self,
-        state: &State,
+        state: &'a S,
         dimensions: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {

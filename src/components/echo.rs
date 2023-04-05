@@ -14,7 +14,6 @@ use crate::components::Dimensions;
 use crate::components::DrawMode;
 use crate::Component;
 use crate::Line;
-use crate::State;
 
 /// Component that repeats whatever lines are put into it.
 /// Mostly useful for testing purposes.
@@ -33,16 +32,16 @@ impl<Msg> Echo<Msg> {
     }
 }
 
-impl<Msg: AsRef<Vec<Line>> + Send + 'static + Debug> Component for Echo<Msg> {
+impl<Msg: AsRef<Vec<Line>> + Send + 'static + Debug> Component<Vec<Line>> for Echo<Msg> {
     fn draw_unchecked(
         &self,
-        state: &State,
+        state: &Vec<Line>,
         _dimensions: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {
         match mode {
             DrawMode::Final if self.collapse => Ok(vec![]),
-            _ => state.get::<Msg>().map(|msg| msg.as_ref().clone()),
+            _ => Ok(state.to_owned()),
         }
     }
 }

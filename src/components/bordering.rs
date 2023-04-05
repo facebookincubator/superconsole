@@ -7,6 +7,8 @@
  * of this source tree.
  */
 
+use std::fmt::Debug;
+
 use crate::components::alignment::HorizontalAlignmentKind;
 use crate::components::Aligned;
 use crate::content::LinesExt;
@@ -15,7 +17,6 @@ use crate::Dimensions;
 use crate::DrawMode;
 use crate::Line;
 use crate::Span;
-use crate::State;
 
 /// The `Bordered` component can be used to put borders on all sides of the output of its child.
 /// This is useful for delimiting the boundaries of a component for reading and aesthetic purposes.
@@ -35,8 +36,8 @@ use crate::State;
 /// @@@@@@@@@@@@@@@@@@@@@
 /// // rest of the output
 #[derive(Debug)]
-pub struct Bordered {
-    child: Aligned,
+pub struct Bordered<S> {
+    child: Aligned<S>,
     pub border: BorderedSpec,
 }
 
@@ -66,8 +67,8 @@ impl Default for BorderedSpec {
     }
 }
 
-impl Bordered {
-    pub fn new(child: Box<dyn Component>, border: BorderedSpec) -> Self {
+impl<S: Debug> Bordered<S> {
+    pub fn new(child: Box<dyn Component<S>>, border: BorderedSpec) -> Self {
         Self {
             child: Aligned {
                 child,
@@ -93,10 +94,10 @@ fn construct_vertical_padding(padding: Span, width: usize) -> Vec<Line> {
         .collect()
 }
 
-impl Component for Bordered {
-    fn draw_unchecked(
+impl<S: Debug> Component<S> for Bordered<S> {
+    fn draw_unchecked<'a>(
         &self,
-        state: &State,
+        state: &'a S,
         Dimensions { width, height }: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {

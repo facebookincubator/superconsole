@@ -25,7 +25,6 @@ pub use splitting::Split;
 use crate::content::LinesExt;
 use crate::Dimensions;
 use crate::Lines;
-use crate::State;
 
 pub mod alignment;
 mod blank;
@@ -46,11 +45,11 @@ pub enum DrawMode {
 
 /// Components are pluggable drawers that output lines of formatted text.
 /// They are composable (eventually) and re-render in place at each render.
-pub trait Component: Debug + Send + ComponentName {
+pub trait Component<S: Debug>: Debug + Send + ComponentName<S> {
     /// This method is to be implemented for components to provide the `draw` method.
-    fn draw_unchecked(
+    fn draw_unchecked<'a>(
         &self,
-        state: &State,
+        state: &'a S,
         dimensions: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Lines>;
@@ -59,17 +58,17 @@ pub trait Component: Debug + Send + ComponentName {
     /// Dimensions refers to the maximum (width, height) this component may use.
     /// The mode refers to if this is the final time the component will be drawn.
     /// If a child component is too large to fit in the dimensions, it is truncated.
-    fn draw(&self, state: &State, dimensions: Dimensions, mode: DrawMode) -> anyhow::Result<Lines> {
+    fn draw<'a>(&self, state: &'a S, dimensions: Dimensions, mode: DrawMode) -> anyhow::Result<Lines> {
         let mut res = self.draw_unchecked(state, dimensions, mode)?;
         res.shrink_lines_to_dimensions(dimensions);
         Ok(res)
     }
 }
 
-pub trait ComponentName {
+pub trait ComponentName<S> {
     fn name(&self) -> &'static str {
         std::any::type_name::<Self>()
     }
 }
 
-impl<C: Component + ?Sized> ComponentName for C {}
+impl<S: Debug, C: Component<S> + ?Sized> ComponentName<S> for C {}

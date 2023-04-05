@@ -7,11 +7,12 @@
  * of this source tree.
  */
 
+use std::fmt::Debug;
+
 use crate::components::Dimensions;
 use crate::components::DrawMode;
 use crate::Component;
 use crate::Line;
-use crate::State;
 
 /// The `Blank` component is a dead-end component that emits nothing.
 /// It can be used for testing purposes or to make a portion of a dividing component empty.
@@ -19,11 +20,11 @@ use crate::State;
 #[derive(Debug)]
 pub struct Blank;
 
-impl Component for Blank {
+impl<S: Debug> Component<S> for Blank {
     /// Returns the empty vector
-    fn draw_unchecked(
+    fn draw_unchecked<'a>(
         &self,
-        _state: &State,
+        _state: &'a S,
         _dimensions: Dimensions,
         _mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {

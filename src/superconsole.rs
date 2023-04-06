@@ -9,8 +9,8 @@
 
 use std::cmp;
 use std::env;
-use std::io;
 use std::fmt::Debug;
+use std::io;
 
 use crossterm::queue;
 use crossterm::terminal::Clear;

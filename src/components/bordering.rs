@@ -150,11 +150,7 @@ mod tests {
             vec!["Even Longer", "ok"].try_into()?, // 13 chars
             Line::default(),
         ];
-        let output = component.draw(
-            &state,
-            Dimensions::new(14, 5),
-            DrawMode::Normal,
-        )?;
+        let output = component.draw(&state, Dimensions::new(14, 5), DrawMode::Normal)?;
 
         // A single character on the right side of the message gets truncated to make way for side padding
         let expected = vec![
@@ -188,11 +184,7 @@ mod tests {
             vec!["Even Longer", "ok"].try_into()?, // 13 chars
             Line::default(),
         ];
-        let output = component.draw(
-            &state,
-            Dimensions::new(13, 7),
-            DrawMode::Normal,
-        )?;
+        let output = component.draw(&state, Dimensions::new(13, 7), DrawMode::Normal)?;
 
         // A single character on the right side of the message gets truncated to make way for side padding
         let expected = vec![
@@ -226,11 +218,7 @@ mod tests {
 
         let state = vec![vec!["Tested"].try_into()?];
 
-        let output = component.draw(
-            &state,
-            Dimensions::new(13, 7),
-            DrawMode::Normal,
-        )?;
+        let output = component.draw(&state, Dimensions::new(13, 7), DrawMode::Normal)?;
         let expected = vec![vec!["🦶🦶🦶"].try_into()?, vec!["Tested"].try_into()?];
 
         assert_eq!(output, expected);

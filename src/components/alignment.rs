@@ -131,8 +131,6 @@ impl<S: Debug> Component<S> for Aligned<S> {
 
 #[cfg(test)]
 mod tests {
-    use derive_more::AsRef;
-
     use crate::components::alignment::HorizontalAlignmentKind;
     use crate::components::alignment::VerticalAlignmentKind;
     use crate::components::Aligned;
@@ -141,49 +139,38 @@ mod tests {
     use crate::Component;
     use crate::Dimensions;
     use crate::Line;
-    use crate::State;
-
-    #[derive(AsRef, Debug)]
-    struct Msg(Vec<Line>);
 
     #[test]
     fn test_align_left_unjustified() {
-        let mut state = State::new();
         let component = Aligned::new(
-            Box::new(Echo::<Msg>::new(false)),
+            Box::new(Echo::new(false)),
             HorizontalAlignmentKind::Left(false),
             VerticalAlignmentKind::Top,
         );
-        let original = vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),
             vec!["pretty normal test"].try_into().unwrap(),
         ];
-        let msg = Msg(original.clone());
-        state.insert(&msg);
         let dimensions = Dimensions::new(20, 20);
         let actual = component
             .draw(&state, dimensions, DrawMode::Normal)
             .unwrap();
-        let expected = original;
 
-        assert_eq!(actual, expected);
+        assert_eq!(actual, state);
     }
 
     #[test]
     fn test_align_left_justified() {
-        let mut state = State::new();
         let component = Aligned::new(
-            Box::new(Echo::<Msg>::new(false)),
+            Box::new(Echo::new(false)),
             HorizontalAlignmentKind::Left(true),
             VerticalAlignmentKind::Top,
         );
-        let original = vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),        // 11 chars
             vec!["pretty normal test"].try_into().unwrap(), // 18 chars
             vec!["short"].try_into().unwrap(),              // 5 chars
         ];
-        let msg = Msg(original);
-        state.insert(&msg);
         let dimensions = Dimensions::new(20, 20);
         let actual = component
             .draw(&state, dimensions, DrawMode::Normal)
@@ -201,19 +188,16 @@ mod tests {
 
     #[test]
     fn test_align_col_center() {
-        let mut state = State::new();
         let component = Aligned::new(
-            Box::new(Echo::<Msg>::new(false)),
+            Box::new(Echo::new(false)),
             HorizontalAlignmentKind::Center,
             VerticalAlignmentKind::Top,
         );
-        let original = vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),          // 11 chars
             vec!["pretty normal testss"].try_into().unwrap(), // 20 chars
             vec!["shorts"].try_into().unwrap(),               // 6 chars
         ];
-        let msg = Msg(original);
-        state.insert(&msg);
         let dimensions = Dimensions::new(20, 20);
         let actual = component
             .draw(&state, dimensions, DrawMode::Normal)
@@ -233,19 +217,16 @@ mod tests {
 
     #[test]
     fn test_align_right() {
-        let mut state = State::new();
         let component = Aligned::new(
-            Box::new(Echo::<Msg>::new(false)),
+            Box::new(Echo::new(false)),
             HorizontalAlignmentKind::Right,
             VerticalAlignmentKind::Top,
         );
-        let original = vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),           // 11 chars
             vec!["pretty normal testsss"].try_into().unwrap(), // 21 chars
             vec!["shorts"].try_into().unwrap(),                // 6 chars
         ];
-        let msg = Msg(original);
-        state.insert(&msg);
         let dimensions = Dimensions::new(20, 20);
         let actual = component
             .draw(&state, dimensions, DrawMode::Normal)
@@ -263,19 +244,16 @@ mod tests {
 
     #[test]
     fn test_align_top() {
-        let mut state = State::new();
         let component = Aligned::new(
-            Box::new(Echo::<Msg>::new(false)),
+            Box::new(Echo::new(false)),
             HorizontalAlignmentKind::Left(false),
             VerticalAlignmentKind::Top,
         );
-        let original = vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),           // 11 chars
             vec!["pretty normal testsss"].try_into().unwrap(), // 21 chars
             vec!["shorts"].try_into().unwrap(),                // 6 chars
         ];
-        let msg = Msg(original);
-        state.insert(&msg);
         let dimensions = Dimensions::new(20, 20);
         let actual = component
             .draw(&state, dimensions, DrawMode::Normal)
@@ -291,19 +269,16 @@ mod tests {
 
     #[test]
     fn test_align_row_center() {
-        let mut state = State::new();
         let component = Aligned::new(
-            Box::new(Echo::<Msg>::new(false)),
+            Box::new(Echo::new(false)),
             HorizontalAlignmentKind::Left(false),
             VerticalAlignmentKind::Center,
         );
-        let original = vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),           // 11 chars
             vec!["pretty normal testsss"].try_into().unwrap(), // 21 chars
             vec!["shorts"].try_into().unwrap(),                // 6 chars
         ];
-        let msg = Msg(original);
-        state.insert(&msg);
         let dimensions = Dimensions::new(20, 10);
         let actual = component
             .draw(&state, dimensions, DrawMode::Normal)
@@ -326,19 +301,16 @@ mod tests {
 
     #[test]
     fn test_align_bottom() {
-        let mut state = State::new();
         let component = Aligned::new(
-            Box::new(Echo::<Msg>::new(false)),
+            Box::new(Echo::new(false)),
             HorizontalAlignmentKind::Left(false),
             VerticalAlignmentKind::Bottom,
         );
-        let original = vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),           // 11 chars
             vec!["pretty normal testsss"].try_into().unwrap(), // 21 chars
             vec!["shorts"].try_into().unwrap(),                // 6 chars
         ];
-        let msg = Msg(original);
-        state.insert(&msg);
         let dimensions = Dimensions::new(20, 10);
         let actual = component
             .draw(&state, dimensions, DrawMode::Normal)

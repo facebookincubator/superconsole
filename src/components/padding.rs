@@ -88,33 +88,25 @@ impl<S: Debug> Component<S> for Padded<S> {
 
 #[cfg(test)]
 mod tests {
-    use derive_more::AsRef;
-
     use crate::components::Echo;
     use crate::components::Padded;
     use crate::Component;
     use crate::Dimensions;
     use crate::DrawMode;
     use crate::Line;
-    use crate::State;
-
-    #[derive(Debug, AsRef)]
-    struct Msg(Vec<Line>);
 
     #[test]
     fn test_pad_left() {
         let padder = Padded {
-            child: Box::new(Echo::<Msg>::new(false)),
+            child: Box::new(Echo::new(false)),
             left: 5,
             ..Default::default()
         };
-        let mut state = State::new();
-        let msg = Msg(vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),
             vec!["ok"].try_into().unwrap(),
             Line::default(),
-        ]);
-        state.insert(&msg);
+        ];
 
         let drawing = padder
             .draw(&state, Dimensions::new(20, 20), DrawMode::Normal)
@@ -132,17 +124,15 @@ mod tests {
     #[test]
     fn test_pad_right() {
         let padder = Padded {
-            child: Box::new(Echo::<Msg>::new(false)),
+            child: Box::new(Echo::new(false)),
             right: 4,
             ..Default::default()
         };
-        let mut state = State::new();
-        let msg = Msg(vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),
             vec!["ok"].try_into().unwrap(),
             Line::default(),
-        ]);
-        state.insert(&msg);
+        ];
 
         let drawing = padder
             .draw(&state, Dimensions::new(20, 20), DrawMode::Normal)
@@ -158,17 +148,15 @@ mod tests {
     #[test]
     fn test_pad_top() {
         let padder = Padded {
-            child: Box::new(Echo::<Msg>::new(false)),
+            child: Box::new(Echo::new(false)),
             top: 5,
             ..Default::default()
         };
-        let mut state = State::new();
-        let msg = Msg(vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),
             vec!["ok"].try_into().unwrap(),
             Line::default(),
-        ]);
-        state.insert(&msg);
+        ];
 
         let drawing = padder
             .draw(&state, Dimensions::new(15, 15), DrawMode::Normal)
@@ -190,17 +178,15 @@ mod tests {
     #[test]
     fn test_pad_bottom() {
         let padder = Padded {
-            child: Box::new(Echo::<Msg>::new(false)),
+            child: Box::new(Echo::new(false)),
             bottom: 5,
             ..Default::default()
         };
-        let mut state = State::new();
-        let msg = Msg(vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),
             vec!["ok"].try_into().unwrap(),
             Line::default(),
-        ]);
-        state.insert(&msg);
+        ];
 
         let drawing = padder
             .draw(&state, Dimensions::new(15, 15), DrawMode::Normal)
@@ -222,16 +208,14 @@ mod tests {
     #[test]
     fn test_no_pad() {
         let padder = Padded {
-            child: Box::new(Echo::<Msg>::new(false)),
+            child: Box::new(Echo::new(false)),
             ..Default::default()
         };
-        let mut state = State::new();
-        let msg = Msg(vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),
             vec!["ok"].try_into().unwrap(),
             Line::default(),
-        ]);
-        state.insert(&msg);
+        ];
 
         let drawing = padder
             .draw(&state, Dimensions::new(15, 15), DrawMode::Normal)
@@ -248,19 +232,17 @@ mod tests {
     #[test]
     fn test_truncated() {
         let padder = Padded {
-            child: Box::new(Echo::<Msg>::new(false)),
+            child: Box::new(Echo::new(false)),
             left: 5,
             right: 3,
             top: 3,
             bottom: 3,
         };
-        let mut state = State::new();
-        let msg = Msg(vec![
+        let state = vec![
             vec!["hello world"].try_into().unwrap(),
             vec!["ok"].try_into().unwrap(),
             Line::default(),
-        ]);
-        state.insert(&msg);
+        ];
         let drawing = padder
             .draw(&state, Dimensions::new(10, 8), DrawMode::Normal)
             .unwrap();

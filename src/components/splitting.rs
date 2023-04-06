@@ -10,8 +10,8 @@
 //! Splitting is one of the most primitive building blocks of a fully featured UI.
 //! This module contains components and enums that allow for splits along either dimension.
 
-use std::fmt::Debug;
 use itertools::Itertools;
+use std::fmt::Debug;
 
 use crate::content::LinesExt;
 use crate::Component;
@@ -129,7 +129,11 @@ impl<S> Split<S> {
     /// * At least one child.
     /// * If Sized, then ratios must sum to approximately 1.
     /// * If Sized, then there must be as many ratios as components
-    pub fn new(children: Vec<Box<dyn Component<S>>>, direction: Direction, split: SplitKind) -> Self {
+    pub fn new(
+        children: Vec<Box<dyn Component<S>>>,
+        direction: Direction,
+        split: SplitKind,
+    ) -> Self {
         assert!(!children.is_empty(), "Must have at least one child.");
 
         let split = split.to_internal_split_kind(children.len());
@@ -185,8 +189,6 @@ impl<S: Debug> Component<S> for Split<S> {
 mod tests {
     use std::iter;
 
-    use derive_more::AsRef;
-
     use super::Split;
     use super::SplitKind;
     use crate::components::Echo;
@@ -194,34 +196,20 @@ mod tests {
     use crate::Direction;
     use crate::DrawMode;
     use crate::Line;
-    use crate::State;
-
-    #[derive(AsRef, Debug)]
-    struct Echo1(Vec<Line>);
-    #[derive(AsRef, Debug)]
-    struct Echo2(Vec<Line>);
-
-    #[derive(AsRef, Debug)]
-    struct Echo3(Vec<Line>);
-
-    fn make_splitter<S>(kind: SplitKind, dimension: Direction) -> Split<S> {
-        Split::new(
-            vec![
-                Box::new(Echo::<Echo1>::new(false)),
-                Box::new(Echo::<Echo2>::new(false)),
-            ],
-            dimension,
-            kind,
-        )
-    }
 
     mod horizontal {
         use super::*;
         use crate::Dimensions;
         #[test]
         fn test_adaptive() {
-            let splitter = make_splitter(SplitKind::Adaptive, Direction::Horizontal);
-            let mut state = State::new();
+            let splitter = Split::new(
+                vec![
+                    Box::new(Echo::new_with_indices(false, (0, 3))),
+                    Box::new(Echo::new_with_indices(false, (3, 6))),
+                ],
+                Direction::Horizontal,
+                SplitKind::Adaptive,
+            );
 
             // left rows all the same length
             let mut left_msg = vec![
@@ -240,10 +228,10 @@ mod tests {
                 vec!["sync", "z", "  "].try_into().unwrap(),
             ];
 
-            let msg1 = Echo1(left_msg.clone());
-            let msg2 = Echo2(right_msg);
-            state.insert(&msg1);
-            state.insert(&msg2);
+            let state = vec![left_msg.clone(), right_msg.clone()]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
 
             let output = splitter
                 .draw(&state, Dimensions::new(10, 10), DrawMode::Normal)
@@ -257,8 +245,10 @@ mod tests {
                 vec!["ok", "so", &" ".repeat(7), "yyy"].try_into().unwrap(),
                 vec!["sync", &" ".repeat(7), "z", "  "].try_into().unwrap(),
             ];
-            let msg1 = Echo1(left_msg);
-            state.insert(&msg1);
+            let state = vec![left_msg.clone(), right_msg.clone()]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
 
             let output = splitter
                 .draw(&state, Dimensions::new(15, 15), DrawMode::Normal)
@@ -268,8 +258,14 @@ mod tests {
 
         #[test]
         fn test_equal() {
-            let splitter = make_splitter(SplitKind::Equal, Direction::Horizontal);
-            let mut state = State::new();
+            let splitter = Split::new(
+                vec![
+                    Box::new(Echo::new_with_indices(false, (0, 3))),
+                    Box::new(Echo::new_with_indices(false, (3, 6))),
+                ],
+                Direction::Horizontal,
+                SplitKind::Equal,
+            );
 
             // left rows all the same length
             let mut left_msg = vec![
@@ -294,10 +290,10 @@ mod tests {
                     .unwrap(),
             ];
 
-            let msg1 = Echo1(left_msg.clone());
-            let msg2 = Echo2(right_msg);
-            state.insert(&msg1);
-            state.insert(&msg2);
+            let state = vec![left_msg.clone(), right_msg.clone()]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
 
             let output = splitter
                 .draw(&state, Dimensions::new(20, 20), DrawMode::Normal)
@@ -315,8 +311,11 @@ mod tests {
                     .try_into()
                     .unwrap(),
             ];
-            let msg1 = Echo1(left_msg);
-            state.insert(&msg1);
+
+            let state = vec![left_msg, right_msg]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
 
             let output = splitter
                 .draw(&state, Dimensions::new(20, 20), DrawMode::Normal)
@@ -328,20 +327,23 @@ mod tests {
         fn test_many_sized() {
             let splitter = Split::new(
                 vec![
-                    Box::new(Echo::<Echo1>::new(false)),
-                    Box::new(Echo::<Echo2>::new(false)),
-                    Box::new(Echo::<Echo3>::new(false)),
+                    Box::new(Echo::new_with_indices(false, (0, 2))),
+                    Box::new(Echo::new_with_indices(false, (2, 3))),
+                    Box::new(Echo::new_with_indices(false, (3, 4))),
                 ],
                 Direction::Horizontal,
                 SplitKind::Sized(vec![0.25, 0.5, 0.25]),
             );
-            let msg1 = Echo1(vec![
+            let msg1 = vec![
                 vec!["test", "ok"].try_into().unwrap(),
                 vec!["also"].try_into().unwrap(),
-            ]);
-            let msg2 = Echo2(vec![vec!["hola"].try_into().unwrap()]);
-            let msg3 = Echo3(vec![vec!["way way way way too long"].try_into().unwrap()]);
-            let state = crate::state!(&msg1, &msg2, &msg3);
+            ];
+            let msg2 = vec![vec!["hola"].try_into().unwrap()];
+            let msg3 = vec![vec!["way way way way too long"].try_into().unwrap()];
+            let state = vec![msg1, msg2, msg3]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
 
             let output = splitter
                 .draw(&state, Dimensions::new(20, 20), DrawMode::Normal)
@@ -366,8 +368,14 @@ mod tests {
         use crate::Dimensions;
         #[test]
         fn test_equal() {
-            let splitter = make_splitter(SplitKind::Equal, Direction::Vertical);
-            let mut state = State::new();
+            let splitter = Split::new(
+                vec![
+                    Box::new(Echo::new_with_indices(false, (0, 2))),
+                    Box::new(Echo::new_with_indices(false, (2, 5))),
+                ],
+                Direction::Vertical,
+                SplitKind::Equal,
+            );
 
             let top = vec![
                 vec!["Line 1"].try_into().unwrap(),
@@ -378,10 +386,11 @@ mod tests {
                 vec!["Line 12"].try_into().unwrap(),
                 vec!["Last line just kiddi"].try_into().unwrap(),
             ];
-            let msg1 = Echo1(top.clone());
-            let msg2 = Echo2(bottom.clone());
-            state.insert(&msg1);
-            state.insert(&msg2);
+
+            let state = vec![top.clone(), bottom.clone()]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
 
             let mut output = top;
             output.extend(iter::repeat(Line::default()).take(8));
@@ -397,55 +406,58 @@ mod tests {
 
         #[test]
         fn test_adaptive() {
-            let splitter = make_splitter(SplitKind::Adaptive, Direction::Vertical);
+            let splitter = Split::new(
+                vec![
+                    Box::new(Echo::new_with_indices(false, (0, 2))),
+                    Box::new(Echo::new_with_indices(false, (2, 5))),
+                ],
+                Direction::Vertical,
+                SplitKind::Adaptive,
+            );
 
             let top = vec![
                 vec!["Line 1"].try_into().unwrap(),
                 vec!["Line 2222"].try_into().unwrap(),
             ];
-            let mut bottom = vec![
+            let bottom = vec![
                 vec!["Line 11"].try_into().unwrap(),
                 vec!["Line 12"].try_into().unwrap(),
                 vec!["Last line just kiddi"].try_into().unwrap(),
             ];
-            let msg1 = Echo1(top.clone());
-            let msg2 = Echo2(bottom.clone());
 
-            let mut output = top;
-            output.append(&mut bottom);
+            let state = vec![top, bottom].into_iter().flatten().collect::<Vec<_>>();
 
             let drawn = splitter
-                .draw(
-                    &crate::state!(&msg1, &msg2),
-                    Dimensions::new(20, 20),
-                    DrawMode::Normal,
-                )
+                .draw(&state, Dimensions::new(20, 20), DrawMode::Normal)
                 .unwrap();
-            assert_eq!(drawn, output);
+            assert_eq!(drawn, state);
         }
 
         #[test]
         fn test_many_sized() {
             let splitter = Split::new(
                 vec![
-                    Box::new(Echo::<Echo1>::new(false)),
-                    Box::new(Echo::<Echo2>::new(false)),
-                    Box::new(Echo::<Echo3>::new(false)),
+                    Box::new(Echo::new_with_indices(false, (0, 6))),
+                    Box::new(Echo::new_with_indices(false, (6, 7))),
+                    Box::new(Echo::new_with_indices(false, (7, 8))),
                 ],
                 Direction::Vertical,
                 SplitKind::Sized(vec![0.25, 0.5, 0.25]),
             );
-            let msg1 = Echo1(vec![
+            let msg1 = vec![
                 vec!["line1"].try_into().unwrap(),
                 vec!["line2"].try_into().unwrap(),
                 vec!["line3"].try_into().unwrap(),
                 vec!["line4"].try_into().unwrap(),
                 vec!["line5"].try_into().unwrap(),
                 vec!["line6"].try_into().unwrap(),
-            ]);
-            let msg2 = Echo2(vec![vec!["line7"].try_into().unwrap()]);
-            let msg3 = Echo3(vec![vec!["line8"].try_into().unwrap()]);
-            let state = crate::state!(&msg1, &msg2, &msg3);
+            ];
+            let msg2 = vec![vec!["line7"].try_into().unwrap()];
+            let msg3 = vec![vec!["line8"].try_into().unwrap()];
+            let state = vec![msg1, msg2, msg3]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
 
             let output = splitter
                 .draw(&state, Dimensions::new(20, 20), DrawMode::Normal)
@@ -485,13 +497,13 @@ mod tests {
         #[test]
         #[should_panic(expected = "Must have at least one child.")]
         fn test_no_children() {
-            Split::new(vec![], Direction::Horizontal, SplitKind::Equal);
+            Split::<()>::new(vec![], Direction::Horizontal, SplitKind::Equal);
         }
 
         #[test]
         #[should_panic(expected = "There must be an equal number of ratios and children.")]
         fn test_different_ratio_count() {
-            Split::new(
+            Split::<()>::new(
                 vec![Box::new(Blank), Box::new(Blank), Box::new(Blank)],
                 Direction::Vertical,
                 SplitKind::Sized(vec![0.4, 0.4]),

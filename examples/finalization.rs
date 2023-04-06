@@ -14,10 +14,8 @@ use std::time::Duration;
 use derive_more::Display;
 use superconsole::components::Component;
 use superconsole::components::DrawMode;
-use superconsole::state;
 use superconsole::Dimensions;
 use superconsole::Line;
-use superconsole::State;
 use superconsole::SuperConsole;
 use tokio::time;
 
@@ -27,45 +25,53 @@ struct Greeter {
     name: String,
 }
 
-#[derive(Display)]
+#[derive(Clone, Debug, Display)]
 struct StoreName(String);
-#[derive(Display)]
+
+#[derive(Clone, Debug, Display)]
 struct CustomerName(String);
 
-impl Component for Greeter {
+#[derive(Clone, Debug)]
+struct GreeterState {
+    store_name: StoreName,
+    customers: Vec<CustomerName>,
+    total_customers: usize,
+}
+
+impl Component<GreeterState> for Greeter {
     fn draw_unchecked(
         &self,
-        state: &State,
+        state: &GreeterState,
         _dimensions: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {
         Ok(match mode {
             DrawMode::Normal => {
                 // Prints a greeting to the current customer.
-                let store_name = state.get::<StoreName>().unwrap();
-                let customers = state.get::<Vec<CustomerName>>().unwrap();
                 let identification = vec![format!("Hello my name is {}!", self.name)]
                     .try_into()
                     .unwrap();
                 let mut messages = vec![identification];
-                for customer_name in customers {
-                    let greeting = vec![format!("Welcome to {}, {}!", store_name, customer_name)]
-                        .try_into()
-                        .unwrap();
+                for customer_name in &state.customers {
+                    let greeting = vec![format!(
+                        "Welcome to {}, {}!",
+                        state.store_name, customer_name
+                    )]
+                    .try_into()
+                    .unwrap();
                     messages.push(greeting);
                 }
                 messages
             }
             DrawMode::Final => {
                 // Prints a message about the employee when he or she leaves for the day.
-                let store_name = state.get::<StoreName>().unwrap();
-                let total_customers = state.get::<usize>().unwrap();
-
-                let farewell = vec![format!("{} is leaving {}", self.name, store_name)]
+                let farewell = vec![format!("{} is leaving {}", self.name, state.store_name)]
                     .try_into()
                     .unwrap();
-                let exit_stats =
-                    format!("{} greeted {} customers today", self.name, total_customers);
+                let exit_stats = format!(
+                    "{} greeted {} customers today",
+                    self.name, state.total_customers
+                );
 
                 vec![farewell, vec![exit_stats].try_into().unwrap()]
             }
@@ -106,8 +112,13 @@ async fn main() {
             .collect::<Vec<_>>();
         let store_name = StoreName(store_names[i].to_owned());
         let correct_num = i + 1;
-        let cur_state = state!(&store_name, &customers, &correct_num);
-        console.render(&cur_state).unwrap();
+        console
+            .render(&GreeterState {
+                store_name: store_name.clone(),
+                customers: customers.clone(),
+                total_customers: correct_num,
+            })
+            .unwrap();
 
         last = Some((store_name, customers, correct_num));
 
@@ -116,6 +127,10 @@ async fn main() {
 
     let (store_name, customers, correct_num) = last.unwrap();
     console
-        .finalize(&state!(&store_name, &customers, &correct_num))
+        .finalize(&GreeterState {
+            store_name: store_name.clone(),
+            customers: customers.clone(),
+            total_customers: correct_num,
+        })
         .unwrap();
 }

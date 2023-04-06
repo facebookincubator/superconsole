@@ -20,26 +20,30 @@ const CRATES: &str = include_str!("cargo/crates.txt");
 const WIDTH: usize = "=======>                  ".len() - 1;
 
 #[derive(Debug)]
+struct LoadingBarState {
+    iteration: usize,
+}
+
+#[derive(Debug)]
 struct LoadingBar<'a>(pub Vec<&'a str>);
 
-impl<'a> Component for LoadingBar<'a> {
+impl<'a> Component<LoadingBarState> for LoadingBar<'a> {
     fn draw_unchecked(
         &self,
-        state: &superconsole::State,
+        state: &LoadingBarState,
         _dimensions: superconsole::Dimensions,
         mode: superconsole::DrawMode,
     ) -> anyhow::Result<superconsole::Lines> {
         let res = match mode {
             superconsole::DrawMode::Normal => {
                 const BUILDING: &str = "   Building ";
-                let iteration = state.get::<usize>()?;
-                let percentage = *iteration as f64 / self.0.len() as f64;
+                let percentage = state.iteration as f64 / self.0.len() as f64;
                 let amount = (percentage * WIDTH as f64).ceil() as usize;
 
                 let building = Span::new_styled(BUILDING.to_owned().cyan().bold())?;
                 let loading_bar = format!(
                     "[{test:=>bar_amt$}{test2:padding_amt$}] {}/{}: ...",
-                    iteration,
+                    state.iteration,
                     self.0.len(),
                     test = ">",
                     test2 = "",
@@ -77,11 +81,11 @@ fn main() {
             building,
             Span::new_unstyled(c).unwrap(),
         ])]);
-        superconsole.render(&superconsole::state!(&i)).unwrap();
+        superconsole.render(&LoadingBarState { iteration: i }).unwrap();
         sleep(Duration::from_secs_f64(0.2));
     }
 
     superconsole
-        .finalize(&superconsole::state!(&count))
+        .finalize(&LoadingBarState { iteration: count })
         .unwrap();
 }

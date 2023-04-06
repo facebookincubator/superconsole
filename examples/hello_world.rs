@@ -14,10 +14,8 @@ use std::time::Instant;
 
 use superconsole::components::Component;
 use superconsole::components::DrawMode;
-use superconsole::state;
 use superconsole::Dimensions;
 use superconsole::Line;
-use superconsole::State;
 use superconsole::SuperConsole;
 use tokio::select;
 use tokio::time;
@@ -36,19 +34,19 @@ impl Foo {
     }
 }
 
-impl Component for Foo {
+impl Component<Instant> for Foo {
     /// Draws the number of seconds that have elapsed since the component was created.
     /// On a second line, draws the string "Hello world!".
     fn draw_unchecked(
         &self,
-        state: &State,
+        state: &Instant,
         _dimensions: Dimensions,
         mode: DrawMode,
     ) -> anyhow::Result<Vec<Line>> {
         Ok(match mode {
             DrawMode::Final => vec![],
             DrawMode::Normal => {
-                let elapsed = state.get::<Instant>().unwrap().duration_since(self.created);
+                let elapsed = state.duration_since(self.created);
                 let line1 = vec![elapsed.as_secs().to_string()].try_into().unwrap();
                 let line2 = vec!["Hello world!".to_owned()].try_into().unwrap();
                 vec![line1, line2]
@@ -93,7 +91,7 @@ async fn main() {
         select! {
             _ = interval.tick() => {
                 let time = Instant::now();
-                renderer.render(&state!(&time)).unwrap();
+                renderer.render(&time).unwrap();
             }
             word = task_that_takes_some_time() => {
                 renderer.emit(process_word(word));

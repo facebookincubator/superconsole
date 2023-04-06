@@ -31,7 +31,6 @@ pub use content::Span;
 pub use dimensions::Dimensions;
 pub use dimensions::Direction;
 pub use error::Error;
-pub use state::State;
 
 pub use crate::builder::Builder;
 pub use crate::superconsole::SuperConsole;
@@ -42,7 +41,6 @@ pub mod content;
 mod dimensions;
 mod error;
 pub mod output;
-mod state;
 pub mod style;
 mod superconsole;
 pub mod testing;

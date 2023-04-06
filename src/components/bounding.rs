@@ -51,29 +51,24 @@ impl<S: Debug> Component<S> for Bounded<S> {
 
 #[cfg(test)]
 mod tests {
-    use derive_more::AsRef;
-
     use super::*;
     use crate::components::echo::Echo;
     use crate::Line;
     use crate::Span;
 
-    #[derive(AsRef, Debug)]
-    struct Msg(Lines);
-
     #[test]
     fn test_no_bounding() -> anyhow::Result<()> {
-        let test = Bounded::new(Box::new(Echo::<Msg>::new(false)), Some(40), Some(40));
-        let msg = Msg(vec![Line::from_iter([Span::new_unstyled("hello world")?])]);
+        let test = Bounded::new(Box::new(Echo::new(false)), Some(40), Some(40));
+        let state = vec![Line::from_iter([Span::new_unstyled("hello world")?])];
         let output = test.draw(
-            &crate::state![&msg],
+            &state,
             Dimensions {
                 width: 50,
                 height: 50,
             },
             DrawMode::Normal,
         )?;
-        let expected = msg.0;
+        let expected = state;
 
         assert_eq!(output, expected);
 
@@ -82,13 +77,13 @@ mod tests {
 
     #[test]
     fn test_bounding() -> anyhow::Result<()> {
-        let test = Bounded::new(Box::new(Echo::<Msg>::new(false)), Some(2), Some(1));
-        let msg = Msg(vec![
+        let test = Bounded::new(Box::new(Echo::new(false)), Some(2), Some(1));
+        let state = vec![
             Line::from_iter([Span::new_unstyled("hello world")?]),
             Line::from_iter([Span::new_unstyled("hello world")?]),
-        ]);
+        ];
         let output = test.draw(
-            &crate::state![&msg],
+            &state,
             Dimensions {
                 width: 50,
                 height: 50,

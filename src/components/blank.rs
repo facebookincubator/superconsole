@@ -34,26 +34,20 @@ impl<S: Debug> Component<S> for Blank {
 
 #[cfg(test)]
 mod tests {
-    use derive_more::AsRef;
-
     use crate::components::echo::Echo;
     use crate::components::DrawMode;
     use crate::Component;
     use crate::Dimensions;
-    use crate::Line;
-
-    #[derive(AsRef, Debug)]
-    struct EchoMsg(Vec<Line>);
 
     #[test]
     fn test_echo_empty() {
-        let echo: Echo<EchoMsg> = Echo::new(false);
+        let echo = Echo::new(false);
 
-        let test = EchoMsg(vec![]);
+        let state = vec![];
 
         let output = echo
             .draw(
-                &crate::state!(&test),
+                &state,
                 Dimensions::new(10, 10),
                 DrawMode::Normal,
             )
@@ -63,20 +57,20 @@ mod tests {
 
     #[test]
     fn test_echo() {
-        let echo: Echo<EchoMsg> = Echo::new(false);
-        let output = vec![
+        let echo = Echo::new(false);
+        let state = vec![
             vec!["Line 1"].try_into().unwrap(),
             vec!["Line 2"].try_into().unwrap(),
         ];
-        let state = EchoMsg(output.clone());
 
         let test_output = echo
             .draw(
-                &crate::state!(&state),
+                &state,
                 Dimensions::new(10, 10),
                 DrawMode::Final,
             )
             .unwrap();
-        assert_eq!(output, test_output);
+
+        assert_eq!(state, test_output);
     }
 }

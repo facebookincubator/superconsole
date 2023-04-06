@@ -56,21 +56,20 @@ mod tests {
     use crate::content::LinesExt;
     use crate::DrawMode;
     use crate::Line;
-    use crate::Lines;
 
     #[test]
     fn test() -> anyhow::Result<()> {
-        let expander = Expanding::new(Box::new(Echo::<Lines>::new(false)));
+        let expander = Expanding::new(Box::new(Echo::new(false)));
         let dims = Dimensions {
             width: 20,
             height: 20,
         };
 
         let longest_line: Line = vec!["Hello world"].try_into()?;
-        let msg: Lines = vec![longest_line.clone(), vec!["foobar"].try_into()?];
-        let result = expander.draw(&crate::state![&msg], dims, DrawMode::Normal)?;
+        let state = vec![longest_line.clone(), vec!["foobar"].try_into()?];
+        let result = expander.draw(&state, dims, DrawMode::Normal)?;
         let expected = {
-            let mut expected = msg;
+            let mut expected = state;
             expected.justify();
             expected
         };
@@ -78,20 +77,20 @@ mod tests {
 
         // testing horizontal
         let now_longest: Line = vec!["foobar"].try_into()?;
-        let msg: Lines = vec![vec!["H"].try_into()?, now_longest.clone()];
-        let result = expander.draw(&crate::state![&msg], dims, DrawMode::Normal)?;
+        let state = vec![vec!["H"].try_into()?, now_longest.clone()];
+        let result = expander.draw(&state, dims, DrawMode::Normal)?;
         let expected = {
-            let mut expected = msg;
+            let mut expected = state;
             expected.pad_lines_right(longest_line.len() - now_longest.len());
             expected
         };
         assert_eq!(result, expected);
 
         // testing vertical
-        let msg: Lines = vec![now_longest];
-        let result = expander.draw(&crate::state![&msg], dims, DrawMode::Normal)?;
+        let state = vec![now_longest];
+        let result = expander.draw(&state, dims, DrawMode::Normal)?;
         let expected = {
-            let mut expected = msg;
+            let mut expected = state;
             expected.set_lines_to_exact_dimensions(Dimensions {
                 width: longest_line.len(),
                 height: 2,

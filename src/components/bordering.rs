@@ -137,26 +137,21 @@ impl<S: Debug> Component<S> for Bordered<S> {
 
 #[cfg(test)]
 mod tests {
-    use derive_more::AsRef;
-
     use super::*;
     use crate::components::echo::Echo;
 
-    #[derive(AsRef, Debug)]
-    struct Msg(Vec<Line>);
-
     #[test]
     fn test_basic() -> anyhow::Result<()> {
-        let component = Bordered::new(Box::new(Echo::<Msg>::new(true)), BorderedSpec::default());
+        let component = Bordered::new(Box::new(Echo::new(true)), BorderedSpec::default());
 
-        let msg = Msg(vec![
+        let state = vec![
             vec!["Test"].try_into()?,              // 4 chars
             vec!["Longer"].try_into()?,            // 6 chars
             vec!["Even Longer", "ok"].try_into()?, // 13 chars
             Line::default(),
-        ]);
+        ];
         let output = component.draw(
-            &crate::state![&msg],
+            &state,
             Dimensions::new(14, 5),
             DrawMode::Normal,
         )?;
@@ -178,7 +173,7 @@ mod tests {
     #[test]
     fn test_complex() -> anyhow::Result<()> {
         let component = Bordered::new(
-            Box::new(Echo::<Msg>::new(true)),
+            Box::new(Echo::new(true)),
             BorderedSpec {
                 top: Some("@@@".try_into()?),
                 left: None,
@@ -187,14 +182,14 @@ mod tests {
             },
         );
 
-        let msg = Msg(vec![
+        let state = vec![
             vec!["Test"].try_into()?,              // 4 chars
             vec!["Longer"].try_into()?,            // 6 chars
             vec!["Even Longer", "ok"].try_into()?, // 13 chars
             Line::default(),
-        ]);
+        ];
         let output = component.draw(
-            &crate::state![&msg],
+            &state,
             Dimensions::new(13, 7),
             DrawMode::Normal,
         )?;
@@ -220,7 +215,7 @@ mod tests {
         let multi_width = "🦶";
 
         let component = Bordered::new(
-            Box::new(Echo::<Msg>::new(true)),
+            Box::new(Echo::new(true)),
             BorderedSpec {
                 top: Some(multi_width.try_into()?),
                 left: None,
@@ -229,10 +224,10 @@ mod tests {
             },
         );
 
-        let msg = Msg(vec![vec!["Tested"].try_into()?]);
+        let state = vec![vec!["Tested"].try_into()?];
 
         let output = component.draw(
-            &crate::state![&msg],
+            &state,
             Dimensions::new(13, 7),
             DrawMode::Normal,
         )?;

@@ -218,26 +218,20 @@ impl<S: Debug> SuperConsole<S> {
 #[cfg(test)]
 mod tests {
     use anyhow::Context as _;
-    use derive_more::AsRef;
 
     use super::*;
     use crate::components::echo::Echo;
     use crate::testing::frame_contains;
     use crate::testing::test_console;
     use crate::testing::SuperConsoleTestingExt;
-    use crate::Lines;
-
-    #[derive(AsRef, Debug)]
-    struct Msg(Lines);
 
     #[test]
     fn test_small_buffer() -> anyhow::Result<()> {
-        let root = Box::new(Echo::<Msg>::new(false));
+        let root = Box::new(Echo::new(false));
         let mut console = test_console(root);
         let msg_count = MINIMUM_EMIT + 5;
         console.emit(vec![vec!["line 1"].try_into()?; msg_count]);
-        let msg = Msg(vec![vec!["line"].try_into()?; msg_count]);
-        let state = crate::state![&msg];
+        let state = vec![vec!["line"].try_into()?; msg_count];
         let mut buffer = Vec::new();
 
         // even though the canvas is larger than the tty
@@ -256,11 +250,10 @@ mod tests {
 
     #[test]
     fn test_huge_buffer() -> anyhow::Result<()> {
-        let root = Box::new(Echo::<Msg>::new(false));
+        let root = Box::new(Echo::new(false));
         let mut console = test_console(root);
         console.emit(vec![vec!["line 1"].try_into()?; MAX_GRAPHEME_BUFFER * 2]);
-        let msg = Msg(vec![vec!["line"].try_into()?; 1]);
-        let state = crate::state![&msg];
+        let state = vec![vec!["line"].try_into()?; 1];
         let mut buffer = Vec::new();
 
         // Even though we have more messages than fit on the screen in the `to_emit` buffer
@@ -280,11 +273,10 @@ mod tests {
     /// Check that no frames are produced when should_render returns false.
     #[test]
     fn test_block_render() -> anyhow::Result<()> {
-        let root = Box::new(Echo::<Msg>::new(false));
+        let root = Box::new(Echo::new(false));
         let mut console = test_console(root);
 
-        let msg = Msg(vec![vec!["state"].try_into()?; 1]);
-        let state = crate::state![&msg];
+        let state = vec![vec!["state"].try_into()?; 1];
 
         console.render(&state)?;
         assert_eq!(console.test_output()?.frames.len(), 1);
@@ -304,11 +296,10 @@ mod tests {
     /// is unblocked.
     #[test]
     fn test_block_lines() -> anyhow::Result<()> {
-        let root = Box::new(Echo::<Msg>::new(false));
+        let root = Box::new(Echo::new(false));
         let mut console = test_console(root);
 
-        let msg = Msg(vec![vec!["state"].try_into()?; 1]);
-        let state = crate::state![&msg];
+        let state = vec![vec!["state"].try_into()?; 1];
 
         console.test_output_mut()?.should_render = false;
         console.emit(vec![vec!["line 1"].try_into()?]);
@@ -335,11 +326,10 @@ mod tests {
     /// Check that render_with_mode does not respect should_render.
     #[test]
     fn test_block_finalize() -> anyhow::Result<()> {
-        let root = Box::new(Echo::<Msg>::new(false));
+        let root = Box::new(Echo::new(false));
         let mut console = test_console(root);
 
-        let msg = Msg(vec![vec!["state"].try_into()?; 1]);
-        let state = crate::state![&msg];
+        let state = vec![vec!["state"].try_into()?; 1];
 
         console.test_output_mut()?.should_render = false;
         console.emit(vec![vec!["line 1"].try_into()?]);

@@ -81,7 +81,9 @@ fn main() {
             building,
             Span::new_unstyled(c).unwrap(),
         ])]);
-        superconsole.render(&LoadingBarState { iteration: i }).unwrap();
+        superconsole
+            .render(&LoadingBarState { iteration: i })
+            .unwrap();
         sleep(Duration::from_secs_f64(0.2));
     }
 

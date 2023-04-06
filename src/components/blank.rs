@@ -46,11 +46,7 @@ mod tests {
         let state = vec![];
 
         let output = echo
-            .draw(
-                &state,
-                Dimensions::new(10, 10),
-                DrawMode::Normal,
-            )
+            .draw(&state, Dimensions::new(10, 10), DrawMode::Normal)
             .unwrap();
         assert_eq!(output, []);
     }
@@ -64,11 +60,7 @@ mod tests {
         ];
 
         let test_output = echo
-            .draw(
-                &state,
-                Dimensions::new(10, 10),
-                DrawMode::Final,
-            )
+            .draw(&state, Dimensions::new(10, 10), DrawMode::Final)
             .unwrap();
 
         assert_eq!(state, test_output);

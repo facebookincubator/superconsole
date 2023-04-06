@@ -58,7 +58,12 @@ pub trait Component<S: Debug>: Debug + Send + ComponentName<S> {
     /// Dimensions refers to the maximum (width, height) this component may use.
     /// The mode refers to if this is the final time the component will be drawn.
     /// If a child component is too large to fit in the dimensions, it is truncated.
-    fn draw<'a>(&self, state: &'a S, dimensions: Dimensions, mode: DrawMode) -> anyhow::Result<Lines> {
+    fn draw<'a>(
+        &self,
+        state: &'a S,
+        dimensions: Dimensions,
+        mode: DrawMode,
+    ) -> anyhow::Result<Lines> {
         let mut res = self.draw_unchecked(state, dimensions, mode)?;
         res.shrink_lines_to_dimensions(dimensions);
         Ok(res)

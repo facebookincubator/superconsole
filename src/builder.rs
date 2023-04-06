@@ -51,7 +51,10 @@ impl Builder {
     }
 
     /// Build a new SuperConsole if stderr is a TTY.
-    pub fn build<S: Debug>(self, root: Box<dyn Component<S>>) -> anyhow::Result<Option<SuperConsole<S>>> {
+    pub fn build<S: Debug>(
+        self,
+        root: Box<dyn Component<S>>,
+    ) -> anyhow::Result<Option<SuperConsole<S>>> {
         if !SuperConsole::<S>::compatible() {
             return Ok(None);
         }

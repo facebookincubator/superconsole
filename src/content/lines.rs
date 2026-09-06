@@ -398,10 +398,19 @@ impl Lines {
 
     /// Formats and renders all lines to `buffer`.
     /// Notably, this *queues* the lines for rendering.  You must flush the buffer.
+    /// The last line is rendered without a trailing newline so the cursor
+    /// stays on the final canvas row (no blank line below the canvas).
     pub(crate) fn render_from_line(&self, writer: &mut Vec<u8>, start: usize) {
-        for line in self.0.iter().skip(start) {
+        let Some(lines) = self.0.get(start..) else {
+            return;
+        };
+        let Some((last, rest)) = lines.split_last() else {
+            return;
+        };
+        for line in rest {
             line.render_with_clear_and_nl(writer);
         }
+        last.render_with_clear(writer);
     }
 
     /// Render the lines without an escape sequence to clear the line.

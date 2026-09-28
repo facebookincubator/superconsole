@@ -21,7 +21,6 @@ use crossterm::terminal::ClearType;
 use crossterm::tty::IsTty;
 
 use crate::Dimensions;
-use crate::Direction;
 use crate::Lines;
 use crate::ansi_support::enable_ansi_support;
 use crate::components::Component;
@@ -240,7 +239,7 @@ impl SuperConsole {
     /// Clears the canvas portion of the superconsole.
     pub fn clear(&mut self) -> Result<(), OutputError> {
         let mut buffer = Vec::new();
-        Self::clear_canvas_pre(&mut buffer, self.canvas_contents.len())?;
+        Self::clear_canvas_pre(&mut buffer, self.canvas_contents.len().saturating_sub(1))?;
         self.canvas_contents = Lines::new();
         Self::clear_canvas_post(&mut buffer)?;
         self.output_mut().output(buffer).map_err(Into::into)
@@ -256,8 +255,7 @@ impl SuperConsole {
         // size so it can be completed in a single syscall otherwise we might see a partially
         // rendered frame.
 
-        // We remove the last line as we always have a blank final line in our output.
-        let size = self.size()?.saturating_sub(1, Direction::Vertical);
+        let size = self.size()?;
 
         self.render_general(root, mode, size)?;
 
@@ -312,7 +310,10 @@ impl SuperConsole {
         let mut buffer = Vec::new();
         buffer.queue(cursor::Hide).map_err(OutputError::Terminal)?;
 
-        Self::clear_canvas_pre(&mut buffer, self.canvas_contents.len() - reuse_prefix)?;
+        Self::clear_canvas_pre(
+            &mut buffer,
+            (self.canvas_contents.len() - reuse_prefix).saturating_sub(1),
+        )?;
 
         if !self.aux_to_emit.is_empty() {
             if self.output().aux_stream_is_tty() {

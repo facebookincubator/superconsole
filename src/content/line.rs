@@ -158,9 +158,8 @@ impl Line {
         }
     }
 
-    /// Renders the formatted content of the line to `stdout`.
-    /// The buffer must be flushed to produce output.
-    pub(crate) fn render_with_clear_and_nl(&self, writer: &mut Vec<u8>) {
+    /// Renders the formatted content of the line and clears to end of line.
+    pub(crate) fn render_with_clear(&self, writer: &mut Vec<u8>) {
         let mut writer = VecAsFmtWrite(writer);
 
         for word in &self.0 {
@@ -170,6 +169,13 @@ impl Line {
         Clear(ClearType::UntilNewLine)
             .write_ansi(&mut writer)
             .unwrap();
+    }
+
+    /// Renders the formatted content of the line, clears to end of line,
+    /// then writes a newline and moves to column 0.
+    pub(crate) fn render_with_clear_and_nl(&self, writer: &mut Vec<u8>) {
+        self.render_with_clear(writer);
+        let mut writer = VecAsFmtWrite(writer);
         writeln!(writer).unwrap();
         MoveToColumn(0).write_ansi(&mut writer).unwrap();
     }

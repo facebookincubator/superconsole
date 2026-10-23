@@ -34,10 +34,7 @@ anyhow = "1.0.104"
 derive_more = { version = "2.1.1", features = ["full"] }
 tokio = { version = "1.53.2", features = ["macros", "rt-multi-thread", "time"] }
 
-[target.'cfg(target_os = "linux")'.dependencies]
-nix = { version = "0.31.3", features = ["fs"] }
-
-[target.'cfg(target_os = "macos")'.dependencies]
+[target.'cfg(unix)'.dependencies]
 nix = { version = "0.31.3", features = ["fs"] }
 
 [workspace]
